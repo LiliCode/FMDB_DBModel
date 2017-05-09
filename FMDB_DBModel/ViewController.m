@@ -7,6 +7,10 @@
 //
 
 #import "ViewController.h"
+#import "SQLStringCreator.h"
+#import "Contacts.h"
+#import "NSObject+Runtime.h"
+
 
 @interface ViewController ()
 
@@ -17,6 +21,16 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    Contacts *contacts = [[Contacts alloc] init];
+    
+    SQLStringCreator *sqlCreator = [SQLStringCreator creator];
+    
+    NSString *sql_createTable = [sqlCreator sql_createTable:NSStringFromClass(contacts.class) ifNotExists:YES columns:[contacts getPropertyList]];
+    
+    NSLog(@"%@", sql_createTable);
+    
+    
     
     
 }

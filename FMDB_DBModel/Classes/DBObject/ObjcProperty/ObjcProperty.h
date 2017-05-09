@@ -27,21 +27,29 @@ typedef NS_ENUM(NSUInteger , ObjcPropertyReferenceMode)
 
 /* Objc基本数据类型 */
 
-FOUNDATION_EXPORT NSString *const TypeChar;         //字符、布尔
-FOUNDATION_EXPORT NSString *const TYpeUnsigendChar;
-FOUNDATION_EXPORT NSString *const TypeInt;
-FOUNDATION_EXPORT NSString *const TypeUnsignedInt;
-FOUNDATION_EXPORT NSString *const TypeLong;         //long、long long
-FOUNDATION_EXPORT NSString *const TypeUnsigendLong; //unsigend long、unsigend long long
-FOUNDATION_EXPORT NSString *const TypeFloat;
-FOUNDATION_EXPORT NSString *const TypeDouble;
-FOUNDATION_EXPORT NSString *const TypePointer;      //指针类型
+FOUNDATION_EXPORT NSString *const ObjcTypeChar;         //字符、布尔
+FOUNDATION_EXPORT NSString *const ObjcTypeUnsigendChar;
+FOUNDATION_EXPORT NSString *const ObjcTypeInt;
+FOUNDATION_EXPORT NSString *const ObjcTypeUnsignedInt;
+FOUNDATION_EXPORT NSString *const ObjcTypeShort;
+FOUNDATION_EXPORT NSString *const ObjcTypeUnsignedShort;
+FOUNDATION_EXPORT NSString *const ObjcTypeLong;         //long、long long
+FOUNDATION_EXPORT NSString *const ObjcTypeUnsigendLong; //unsigend long、unsigend long long
+FOUNDATION_EXPORT NSString *const ObjcTypeFloat;
+FOUNDATION_EXPORT NSString *const ObjcTypeDouble;
+FOUNDATION_EXPORT NSString *const ObjcTypeLongDouble;
+FOUNDATION_EXPORT NSString *const ObjcTypePointer;      //指针类型
+/* Objc对象 */
+FOUNDATION_EXPORT NSString *const ObjcTypeAnyObject;    //任意类型 id
+FOUNDATION_EXPORT NSString *const ObjcTypeNSNumber;
+FOUNDATION_EXPORT NSString *const ObjcTypeNSString;
+
 
 
 @interface ObjcProperty : NSObject
 
 @property (copy , nonatomic) NSString *propertyName;    //属性名称
-@property (copy , nonatomic) NSString *typeName;        //类型名称
+@property (copy , nonatomic) NSString *objcType;        //类型名称
 
 @property (assign , nonatomic) BOOL isNonatomic;        //是否非原子
 @property (assign , nonatomic) BOOL isReadonly;         //是否只读

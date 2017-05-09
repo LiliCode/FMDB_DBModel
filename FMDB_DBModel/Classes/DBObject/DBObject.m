@@ -7,8 +7,25 @@
 //
 
 #import "DBObject.h"
+#import "DBHelper.h"
+#import "ObjcProperty/NSObject+Runtime.h"
+#import "ObjcProperty/ObjcProperty.h"
 
 @implementation DBObject
+
++ (BOOL)createTable
+{
+    
+    
+    return [self createTableIfNotExists:NSStringFromClass(self.class) parameter:@[]];
+}
+
++ (BOOL)createTableIfNotExists:(NSString *)tableName parameter:(NSArray *)parameter
+{
+    
+    
+    return NO;
+}
 
 
 

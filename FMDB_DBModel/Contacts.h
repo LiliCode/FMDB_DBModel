@@ -10,10 +10,10 @@
 
 @interface Contacts : DBObject
 
-@property (assign , nonatomic) NSUInteger uid;  //primary key
+@property (strong , nonatomic) NSNumber *uid;  //primary key
 @property (copy , nonatomic) NSString *name;    //姓名
 @property (copy , nonatomic) NSString *tel;
-
+@property (copy , nonatomic) NSString *logo;
 
 
 

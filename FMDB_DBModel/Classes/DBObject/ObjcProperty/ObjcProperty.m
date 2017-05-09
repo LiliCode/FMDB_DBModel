@@ -8,15 +8,22 @@
 
 #import "ObjcProperty.h"
 
-NSString *const TypeChar = @"c";         //字符、布尔
-NSString *const TypeUnsigendChar = @"C";
-NSString *const TypeInt = @"i";
-NSString *const TypeUnsignedInt = @"I";
-NSString *const TypeLong = @"q";         //long、long long
-NSString *const TypeUnsigendLong = @"Q"; //unsigend long、unsigend long long
-NSString *const TypeFloat = @"f";
-NSString *const TypeDouble = @"d";
-NSString *const TypePointer = @"*";      //指针类型
+NSString *const ObjcTypeChar = @"c";         //字符、布尔
+NSString *const ObjcTypeUnsigendChar = @"C";
+NSString *const ObjcTypeInt = @"i";
+NSString *const ObjcTypeUnsignedInt = @"I";
+NSString *const ObjcTypeShort = @"s";
+NSString *const ObjcTypeUnsignedShort = @"S";
+NSString *const ObjcTypeLong = @"q";         //long、long long
+NSString *const ObjcTypeUnsigendLong = @"Q"; //unsigend long、unsigend long long
+NSString *const ObjcTypeFloat = @"f";
+NSString *const ObjcTypeDouble = @"d";
+NSString *const ObjcTypeLongDouble = @"D";
+NSString *const ObjcTypePointer = @"*";      //指针类型
+
+NSString *const ObjcTypeAnyObject = @"id";    //任意类型 id
+NSString *const ObjcTypeNSNumber = @"NSNumber";
+NSString *const ObjcTypeNSString = @"NSString";
 
 
 
@@ -46,7 +53,7 @@ NSString *const TypePointer = @"*";      //指针类型
     //属性名称
     self.propertyName = [NSString stringWithCString:property_getName(property) encoding:NSUTF8StringEncoding];
     //类型名称
-    self.typeName = [NSString stringWithCString:property_getType(property) encoding:NSUTF8StringEncoding];
+    self.objcType = [NSString stringWithCString:property_getType(property) encoding:NSUTF8StringEncoding];
     
     unsigned int outCount = 0;
     objc_property_attribute_t *attri_list = property_copyAttributeList(property, &outCount);
@@ -128,7 +135,7 @@ static const char *property_getType(objc_property_t property)
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"pptName:%@ typeName:%@ isNonatomic:%d isReadonly:%d get:%@ set:%@ reference:%lu", self.propertyName, self.typeName, self.isNonatomic, self.isReadonly, self.getterMethod, self.setterMethod, self.referenceMode];
+    return [NSString stringWithFormat:@"pptName:%@ objcType:%@ isNonatomic:%d isReadonly:%d get:%@ set:%@ reference:%lu", self.propertyName, self.objcType, self.isNonatomic, self.isReadonly, self.getterMethod, self.setterMethod, self.referenceMode];
 }
 
 
