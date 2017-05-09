@@ -132,10 +132,16 @@ static const char *property_getType(objc_property_t property)
     return "";
 }
 
+- (id)defaultValue
+{
+    
+    
+    return nil;
+}
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"pptName:%@ objcType:%@ isNonatomic:%d isReadonly:%d get:%@ set:%@ reference:%lu", self.propertyName, self.objcType, self.isNonatomic, self.isReadonly, self.getterMethod, self.setterMethod, self.referenceMode];
+    return [NSString stringWithFormat:@"pptName:%@ objcType:%@ value:%@ isNonatomic:%d isReadonly:%d get:%@ set:%@ reference:%lu", self.propertyName, self.objcType, self.value, self.isNonatomic, self.isReadonly, self.getterMethod, self.setterMethod, self.referenceMode];
 }
 
 

@@ -30,8 +30,37 @@
  */
 - (NSString *)sql_createTable:(NSString *)tableName ifNotExists:(BOOL)ine columns:(NSArray <ObjcProperty *>*)columns;
 
+/**
+ 生成删除表的SQL语句
 
+ @param tableName 表名称
+ @param ifExists 是否插入判断表是否存在的语句
+ @return 返回完整的语句
+ */
+- (NSString *)sql_dropTable:(NSString *)tableName ifExists:(BOOL)ifExists;
+
+/**
+ 生成查询语句
+
+ @param columns 需要查询的字段
+ @param tableName 表名称
+ @param query where条件，查询条件
+ @return 返回完整的SQL
+ */
+- (NSString *)sql_select:(NSArray <NSString *>*)columns from:(NSString *)tableName where:(NSString *)query;
+
+/**
+ 生成插入一行的语句
+
+ @param tableName 表名称
+ @param values 数值列表
+ @return 返回完整的SQL
+ */
+- (NSString *)sql_insertInto:(NSString *)tableName values:(NSArray <ObjcProperty *>*)values;
 
 @end
+
+
+
 
 

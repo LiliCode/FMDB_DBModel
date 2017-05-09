@@ -48,6 +48,8 @@ FOUNDATION_EXPORT NSString *const ObjcTypeNSString;
 
 @interface ObjcProperty : NSObject
 
+@property (strong , nonatomic) id value;                //属性值
+
 @property (copy , nonatomic) NSString *propertyName;    //属性名称
 @property (copy , nonatomic) NSString *objcType;        //类型名称
 
@@ -68,6 +70,13 @@ FOUNDATION_EXPORT NSString *const ObjcTypeNSString;
  */
 + (instancetype)objcProperty:(objc_property_t)property;
 
+
+/**
+ 默认值
+
+ @return 如果value = nil返回默认值
+ */
+- (id)defaultValue;
 
 @end
 

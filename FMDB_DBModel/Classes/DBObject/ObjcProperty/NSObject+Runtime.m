@@ -22,6 +22,8 @@
     {
         //创建属性类型
         ObjcProperty *objc_ppt = [ObjcProperty objcProperty:*(propertyList + i)];
+        //获取属性值
+        objc_ppt.value = [self valueForKey:objc_ppt.propertyName];
         //存入数组
         [list addObject:objc_ppt];
     }
@@ -34,3 +36,7 @@
 
 
 @end
+
+
+
+
