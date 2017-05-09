@@ -10,6 +10,8 @@
 
 @interface DBObject : NSObject
 
+@property (assign , nonatomic) unsigned long long pKey;
+
 
 
 @end
