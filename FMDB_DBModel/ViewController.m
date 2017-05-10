@@ -23,10 +23,10 @@
     [super viewDidLoad];
     
     Contacts *contacts = [[Contacts alloc] init];
-    contacts.uid = 5;
-    contacts.name = @"MS";
-    contacts.tel = @"400-88300000";
-    contacts.logo = @"/user/msLogo.jpg";
+    contacts.uid = 6;
+    contacts.name = @"EHUU";
+    contacts.tel = @"028-65770888";
+    contacts.logo = @"/user/EhuuLogo.jpg";
     
     SQLStringCreator *sqlCreator = [SQLStringCreator creator];
     
@@ -42,6 +42,14 @@
     NSString *sql_insertTable = [sqlCreator sql_insertInto:NSStringFromClass(contacts.class) values:[contacts getPropertyList]];
     NSLog(@"%@", sql_insertTable);
     
+    NSString *sql_updateTable = [sqlCreator sql_update:NSStringFromClass(contacts.class) set:[contacts getPropertyList] where:@"uid = 6"];
+    NSLog(@"%@", sql_updateTable);
+    
+    NSString *sql_deleteTable = [sqlCreator sql_delete:DBTableName(contacts) where:@"uid = 6"];
+    NSLog(@"%@", sql_deleteTable);
+    
+    NSString *sql_alter = [sqlCreator sql_alterTable:DBTableName(contacts) addColumn:[[contacts getPropertyList] lastObject]];
+    NSLog(@"%@", sql_alter);
 }
 
 

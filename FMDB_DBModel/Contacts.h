@@ -7,6 +7,7 @@
 //
 
 #import "DBObject.h"
+#import <CoreGraphics/CGBase.h>
 
 @interface Contacts : DBObject
 
@@ -14,6 +15,10 @@
 @property (copy , nonatomic) NSString *name;    //姓名
 @property (copy , nonatomic) NSString *tel;
 @property (copy , nonatomic) NSString *logo;
+@property (copy , nonatomic) NSString *address; //地址
+@property (strong , nonatomic) NSNumber *sex;
+@property (assign , nonatomic) CGFloat point;
+
 
 
 

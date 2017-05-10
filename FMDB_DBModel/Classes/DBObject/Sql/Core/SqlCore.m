@@ -38,7 +38,7 @@
 
 - (NSString *)select_distinct:(NSArray *)cols
 {
-    NSMutableString *sql_select = [[NSMutableString alloc] initWithString:@"SELECT DISTINCT"];
+    NSMutableString *sql_select = [[NSMutableString alloc] initWithString:@"SELECT DISTINCT "];
     [sql_select appendString:[cols componentsJoinedByString:@","]?:@"*"]; //拼接需要查询的字段
     
     return sql_select;
