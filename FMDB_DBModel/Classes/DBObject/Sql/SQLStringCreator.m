@@ -7,8 +7,8 @@
 //
 
 #import "SQLStringCreator.h"
-#import "ObjcProperty+SQL.h"
 #import "NSObject+Runtime.h"
+#import "SqlCore.h"
 
 @implementation SQLStringCreator
 
@@ -79,18 +79,22 @@
         return nil;
     }
     
-    NSMutableString *sql = [[NSMutableString alloc] initWithString:@"SELECT "];
-    [sql appendString:[columns componentsJoinedByString:@","]?:@"*"]; //拼接需要查询的字段
-    [sql appendFormat:@" FROM %@", tableName];
-    //拼接where子句
-    if (query.length)
+    SqlCore *sqlCore = [[SqlCore alloc] init];
+    
+    return [NSString stringWithFormat:@"%@ %@ %@;", [sqlCore select:columns], [sqlCore from:tableName], [sqlCore where:query]];
+}
+
+- (NSString *)sql_select_distinct:(NSArray<NSString *> *)columns from:(NSString *)tableName where:(NSString *)query
+{
+    if (!tableName)
     {
-        [sql appendFormat:@" WHERE %@", query];
+        NSLog(@"%s:表名称:%@", __func__, tableName);
+        return nil;
     }
     
-    [sql appendString:@";"];
+    SqlCore *sqlCore = [[SqlCore alloc] init];
     
-    return [sql copy];
+    return [NSString stringWithFormat:@"%@ %@ %@;", [sqlCore select_distinct:columns], [sqlCore from:tableName], [sqlCore where:query]];
 }
 
 - (NSString *)sql_insertInto:(NSString *)tableName values:(NSArray<ObjcProperty *> *)values
@@ -101,21 +105,9 @@
         return nil;
     }
     
-    NSMutableString *sql = [[NSMutableString alloc] initWithFormat:@"INSERT INTO %@ (", tableName];
-    //行名称列表
-    NSMutableArray *columnsList = [NSMutableArray new];
-    //值列表
-    NSMutableArray *valueList = [NSMutableArray new];
-    for (ObjcProperty *pro in values)
-    {
-        [columnsList addObject:pro.propertyName];
-        [valueList addObject:[NSObject defaultValue:pro.value]];
-    }
+    SqlCore *sql = [[SqlCore alloc] init];
     
-    [sql appendFormat:@"%@) VALUES(", [columnsList componentsJoinedByString:@","]];
-    [sql appendFormat:@"%@);", [valueList componentsJoinedByString:@","]];
-    
-    return [sql copy];
+    return [NSString stringWithFormat:@"INSERT INTO %@ %@;", tableName, [sql values:values]];
 }
 
 

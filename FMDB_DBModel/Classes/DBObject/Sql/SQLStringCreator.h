@@ -50,6 +50,17 @@
 - (NSString *)sql_select:(NSArray <NSString *>*)columns from:(NSString *)tableName where:(NSString *)query;
 
 /**
+ 生成查询语句
+ ----不会查找重复的数据
+
+ @param columns 需要查询的字段
+ @param tableName 表名称
+ @param query where条件，查询条件
+ @return 返回完整的SQL
+ */
+- (NSString *)sql_select_distinct:(NSArray <NSString *>*)columns from:(NSString *)tableName where:(NSString *)query;
+
+/**
  生成插入一行的语句
 
  @param tableName 表名称

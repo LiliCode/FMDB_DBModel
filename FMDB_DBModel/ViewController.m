@@ -23,6 +23,10 @@
     [super viewDidLoad];
     
     Contacts *contacts = [[Contacts alloc] init];
+    contacts.uid = 5;
+    contacts.name = @"MS";
+    contacts.tel = @"400-88300000";
+    contacts.logo = @"/user/msLogo.jpg";
     
     SQLStringCreator *sqlCreator = [SQLStringCreator creator];
     
@@ -32,7 +36,7 @@
     NSString *sql_dropTable = [sqlCreator sql_dropTable:NSStringFromClass(contacts.class) ifExists:YES];
     NSLog(@"%@", sql_dropTable);
     
-    NSString *sql_selectTable = [sqlCreator sql_select:@[@"uid", @"tel"] from:NSStringFromClass(contacts.class) where:@"uid >= 1 AND uid < 3"];
+    NSString *sql_selectTable = [sqlCreator sql_select_distinct:@[@"uid", @"tel"] from:NSStringFromClass(contacts.class) where:@"uid >= 1 AND uid < 3"];
     NSLog(@"%@", sql_selectTable);
     
     NSString *sql_insertTable = [sqlCreator sql_insertInto:NSStringFromClass(contacts.class) values:[contacts getPropertyList]];

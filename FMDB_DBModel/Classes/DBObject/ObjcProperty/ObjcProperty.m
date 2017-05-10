@@ -134,9 +134,19 @@ static const char *property_getType(objc_property_t property)
 
 - (id)defaultValue
 {
+    if (!self.value)
+    {
+        if ([self.objcType isEqualToString:ObjcTypeNSNumber])
+        {
+            self.value = @0;
+        }
+        else if ([self.objcType isEqualToString:ObjcTypeNSString])
+        {
+            self.value = @"";
+        }
+    }
     
-    
-    return nil;
+    return self;
 }
 
 - (NSString *)description

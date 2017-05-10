@@ -8,6 +8,21 @@
 
 #import <Foundation/Foundation.h>
 
+
+@protocol DBSQL <NSObject>
+
+@optional
+
+/**
+ 设置主键
+
+ @return 返回主键字符串
+ */
+- (NSString *)sql_primaryKey;
+
+@end
+
+
 @interface DBObject : NSObject
 
 @property (assign , nonatomic) unsigned long long pKey; // PRIMARY KEY
