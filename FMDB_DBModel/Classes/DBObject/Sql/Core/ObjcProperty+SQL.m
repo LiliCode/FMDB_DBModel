@@ -35,7 +35,8 @@ static char *kSqliteTypeKey = "kSqliteTypeKey";
     if ([self.objcType isEqualToString:ObjcTypeInt] || [self.objcType isEqualToString:ObjcTypeUnsignedInt] ||
         [self.objcType isEqualToString:ObjcTypeShort] || [self.objcType isEqualToString:ObjcTypeUnsignedShort] ||
         [self.objcType isEqualToString:ObjcTypeLong] || [self.objcType isEqualToString:ObjcTypeUnsigendLong] ||
-        [self.objcType isEqualToString:ObjcTypeNSNumber])
+        [self.objcType isEqualToString:ObjcTypeNSNumber] || [self.objcType isEqualToString:ObjcTypeChar] ||
+        [self.objcType isEqualToString:ObjcTypeUnsigendChar] || [self.objcType isEqualToString:ObjcTypeBool])
     {
         self.sqlType = [SQL_INTEGER copy];
     }
@@ -47,6 +48,10 @@ static char *kSqliteTypeKey = "kSqliteTypeKey";
     else if ([self.objcType isEqualToString:ObjcTypeNSString])
     {
         self.sqlType = [SQL_TEXT copy];
+    }
+    else if ([self.objcType isEqualToString:ObjcTypeNSArray] || [self.objcType isEqualToString:ObjcTypeNSMutableArray])
+    {
+        self.sqlType = [SQL_BLOB copy];
     }
     else
     {

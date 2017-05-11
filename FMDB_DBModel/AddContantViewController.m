@@ -7,8 +7,11 @@
 //
 
 #import "AddContantViewController.h"
+#import "Contacts.h"
 
 @interface AddContantViewController ()
+@property (weak, nonatomic) IBOutlet UITextField *nameTextField;
+@property (weak, nonatomic) IBOutlet UITextField *telTextField;
 
 @end
 
@@ -23,9 +26,27 @@
 
 - (IBAction)save:(UIBarButtonItem *)sender
 {
-    
-    
-    [self.navigationController popViewControllerAnimated:YES];
+    if (self.nameTextField.text.length && self.telTextField.text.length)
+    {
+        Contacts *contact = [[Contacts alloc] init];
+        contact.name = self.nameTextField.text;
+        contact.tel = self.telTextField.text;
+        
+        [contact insertWithCompletion:^(NSError *error) {
+            if (error)
+            {
+                NSLog(@"%@", error);
+            }
+            else
+            {
+                [self.navigationController popViewControllerAnimated:YES];
+            }
+        }];
+    }
+    else
+    {
+        NSLog(@"请完善信息");
+    }
 }
 
 

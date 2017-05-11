@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "SqlCore.h"
 
 @class ObjcProperty;
 

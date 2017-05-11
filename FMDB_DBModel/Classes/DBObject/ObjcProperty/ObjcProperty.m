@@ -10,6 +10,7 @@
 
 NSString *const ObjcTypeChar = @"c";         //字符、布尔
 NSString *const ObjcTypeUnsigendChar = @"C";
+NSString *const ObjcTypeBool = @"B";
 NSString *const ObjcTypeInt = @"i";
 NSString *const ObjcTypeUnsignedInt = @"I";
 NSString *const ObjcTypeShort = @"s";
@@ -24,6 +25,8 @@ NSString *const ObjcTypePointer = @"*";      //指针类型
 NSString *const ObjcTypeAnyObject = @"id";    //任意类型 id
 NSString *const ObjcTypeNSNumber = @"NSNumber";
 NSString *const ObjcTypeNSString = @"NSString";
+NSString *const ObjcTypeNSArray = @"NSArray";
+NSString *const ObjcTypeNSMutableArray = @"NSMutableArray";
 
 
 
@@ -143,6 +146,10 @@ static const char *property_getType(objc_property_t property)
         else if ([self.objcType isEqualToString:ObjcTypeNSString])
         {
             self.value = @"";
+        }
+        else if ([self.objcType isEqualToString:ObjcTypeNSArray] || [self.objcType isEqualToString:ObjcTypeNSMutableArray])
+        {
+            self.value = [NSKeyedArchiver archivedDataWithRootObject:@[]];
         }
     }
     

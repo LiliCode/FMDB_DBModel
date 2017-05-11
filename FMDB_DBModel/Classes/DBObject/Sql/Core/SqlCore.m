@@ -94,11 +94,11 @@
         NSString *keyValue = nil;
         if ([pro.objcType isEqualToString:ObjcTypeNSString])
         {
-            keyValue = [NSString stringWithFormat:@"%@=\'%@\'", pro.propertyName, pro.value];
+            keyValue = [NSString stringWithFormat:@"%@=\'%@\'", pro.propertyName, [[pro defaultValue] value]];
         }
         else
         {
-            keyValue = [NSString stringWithFormat:@"%@=%@", pro.propertyName, pro.value];
+            keyValue = [NSString stringWithFormat:@"%@=%@", pro.propertyName, [[pro defaultValue] value]];
         }
         
         [values addObject:keyValue];

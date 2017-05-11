@@ -7,8 +7,10 @@
 //
 
 #import "ContactsTableViewController.h"
+#import "Contacts.h"
 
 @interface ContactsTableViewController ()
+@property (strong , nonatomic) NSMutableArray *list;
 
 @end
 
@@ -21,6 +23,18 @@
     
 }
 
+- (void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    
+    [Contacts selectWithCompletion:^(NSArray *result) {
+        if (result.count)
+        {
+            self.list = [result mutableCopy];
+            [self.tableView reloadData];
+        }
+    }];
+}
 
 - (IBAction)addContact:(UIBarButtonItem *)sender
 {
@@ -29,11 +43,7 @@
 
 
 
-- (void)didReceiveMemoryWarning
-{
-    [super didReceiveMemoryWarning];
-    
-}
+
 
 #pragma mark - Table view data source
 
@@ -44,7 +54,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 0;
+    return self.list.count;
 }
 
 
@@ -52,11 +62,19 @@
 {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
     
-    
+    Contacts *contact = [self.list objectAtIndex:indexPath.row];
+    cell.textLabel.text = contact.name;
+    cell.detailTextLabel.text = contact.tel;
     
     return cell;
 }
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    
+}
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -68,7 +86,20 @@
     if (editingStyle == UITableViewCellEditingStyleDelete)
     {
         // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        Contacts *contact = [self.list objectAtIndex:indexPath.row];
+        [contact deleteObjectWithCompletion:^(NSError *error) {
+            if (error)
+            {
+                NSLog(@"%@", error);
+            }
+            else
+            {
+                [self.list removeObjectAtIndex:indexPath.row];
+                [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+            }
+        }];
+        
+        
     } else if (editingStyle == UITableViewCellEditingStyleInsert)
     {
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
@@ -76,6 +107,12 @@
 }
 
 
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    
+}
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {

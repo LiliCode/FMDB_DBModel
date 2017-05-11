@@ -8,7 +8,7 @@
 
 #import "SQLStringCreator.h"
 #import "NSObject+Runtime.h"
-#import "SqlCore.h"
+
 
 @implementation SQLStringCreator
 
@@ -95,8 +95,14 @@
     }
     
     SqlCore *sqlCore = [[SqlCore alloc] init];
+    NSMutableString *sql = [[NSString stringWithFormat:@"%@ %@", [sqlCore select:columns], [sqlCore from:tableName]] mutableCopy];
+    if (query)
+    {
+        [sql appendFormat:@" %@", [sqlCore where:query]];
+    }
+    [sql appendString:@";"];
     
-    return [NSString stringWithFormat:@"%@ %@ %@;", [sqlCore select:columns], [sqlCore from:tableName], [sqlCore where:query]];
+    return [sql copy];
 }
 
 - (NSString *)sql_select_distinct:(NSArray<NSString *> *)columns from:(NSString *)tableName where:(NSString *)query
