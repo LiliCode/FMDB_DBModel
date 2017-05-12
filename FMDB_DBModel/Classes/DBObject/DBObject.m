@@ -13,15 +13,13 @@
 
 @implementation DBObject
 
-- (instancetype)init
++ (void)initialize
 {
-    if (self = [super init])
+    if (self != [DBObject self])
     {
         //创建表
         [self.class createTable];
     }
-    
-    return self;
 }
 
 + (NSArray *)getAllProperty
@@ -92,9 +90,8 @@
                     NSLog(@"%@ 新增字段失败!", tableName);
                     return NO;
                 }
+                break;
             }
-            
-            break;
         }
     }
     

@@ -6,6 +6,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11524"/>
+        <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -51,22 +52,22 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="Cell" textLabel="z5k-f0-Msr" detailTextLabel="euu-Tq-3Q6" style="IBUITableViewCellStyleValue1" id="XLk-rQ-SZX">
-                                <rect key="frame" x="0.0" y="28" width="320" height="44"/>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="Cell" textLabel="z5k-f0-Msr" detailTextLabel="euu-Tq-3Q6" rowHeight="50" style="IBUITableViewCellStyleValue1" id="XLk-rQ-SZX">
+                                <rect key="frame" x="0.0" y="28" width="320" height="50"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="XLk-rQ-SZX" id="09h-H6-oUA">
-                                    <rect key="frame" x="0.0" y="0.0" width="287" height="43.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="287" height="49"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Title" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="z5k-f0-Msr">
-                                            <rect key="frame" x="15" y="12" width="33.5" height="20.5"/>
+                                            <rect key="frame" x="15" y="14" width="34" height="21"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Detail" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="euu-Tq-3Q6">
-                                            <rect key="frame" x="241" y="12" width="44" height="20.5"/>
+                                            <rect key="frame" x="241" y="14" width="44" height="21"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>
@@ -82,11 +83,18 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Contacts" id="SWl-5d-3M7">
-                        <barButtonItem key="rightBarButtonItem" systemItem="add" id="59a-GU-IHp">
-                            <connections>
-                                <action selector="addContact:" destination="gFt-wz-W6n" id="8vM-Lt-uwS"/>
-                            </connections>
-                        </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem systemItem="add" id="59a-GU-IHp">
+                                <connections>
+                                    <action selector="addContact:" destination="gFt-wz-W6n" id="8vM-Lt-uwS"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem systemItem="trash" id="RJ8-Xp-bsK">
+                                <connections>
+                                    <action selector="removeAllContact:" destination="gFt-wz-W6n" id="edd-bJ-gmL"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
                     </navigationItem>
                     <connections>
                         <segue destination="8vF-tc-RRt" kind="show" identifier="add" id="KCk-Re-oNs"/>
@@ -126,12 +134,24 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="地址" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="Ju3-3P-XJp">
+                                <rect key="frame" x="16" y="223" width="288" height="45"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="45" id="dUP-rb-wvh"/>
+                                </constraints>
+                                <nil key="textColor"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="Emj-Dn-Po0" firstAttribute="top" secondItem="LQ4-tB-swF" secondAttribute="bottom" constant="18" id="3DS-9R-Q7j"/>
                             <constraint firstAttribute="trailing" secondItem="LQ4-tB-swF" secondAttribute="trailing" constant="16" id="4mJ-n1-KzF"/>
+                            <constraint firstItem="Ju3-3P-XJp" firstAttribute="top" secondItem="Emj-Dn-Po0" secondAttribute="bottom" constant="16" id="9Aq-7r-ftH"/>
                             <constraint firstItem="LQ4-tB-swF" firstAttribute="top" secondItem="m9m-eO-tFo" secondAttribute="bottom" constant="35" id="BeR-WB-QIl"/>
+                            <constraint firstAttribute="trailing" secondItem="Ju3-3P-XJp" secondAttribute="trailing" constant="16" id="MPQ-c9-6TB"/>
+                            <constraint firstItem="Ju3-3P-XJp" firstAttribute="leading" secondItem="fb0-0c-Usa" secondAttribute="leading" constant="16" id="YBk-Ig-O2V"/>
                             <constraint firstAttribute="trailing" secondItem="Emj-Dn-Po0" secondAttribute="trailing" constant="16" id="gYm-vL-URf"/>
                             <constraint firstItem="LQ4-tB-swF" firstAttribute="leading" secondItem="fb0-0c-Usa" secondAttribute="leading" constant="16" id="p4Z-cz-shb"/>
                             <constraint firstItem="Emj-Dn-Po0" firstAttribute="leading" secondItem="fb0-0c-Usa" secondAttribute="leading" constant="16" id="umU-cr-HFg"/>
@@ -145,6 +165,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="addressTextField" destination="Ju3-3P-XJp" id="RvG-0g-KqV"/>
                         <outlet property="nameTextField" destination="LQ4-tB-swF" id="ubQ-3Z-WwZ"/>
                         <outlet property="telTextField" destination="Emj-Dn-Po0" id="Rig-rX-V9k"/>
                     </connections>

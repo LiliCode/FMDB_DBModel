@@ -12,6 +12,7 @@
 @interface AddContantViewController ()
 @property (weak, nonatomic) IBOutlet UITextField *nameTextField;
 @property (weak, nonatomic) IBOutlet UITextField *telTextField;
+@property (weak, nonatomic) IBOutlet UITextField *addressTextField;
 
 @end
 
@@ -21,27 +22,52 @@
 {
     [super viewDidLoad];
     
-    
+    if (self.mode == ContactStyle_edit)
+    {
+        self.nameTextField.text = self.contact.name;
+        self.telTextField.text = self.contact.tel;
+        self.addressTextField.text = self.contact.address;
+        self.telTextField.enabled = NO;
+    }
 }
 
 - (IBAction)save:(UIBarButtonItem *)sender
 {
     if (self.nameTextField.text.length && self.telTextField.text.length)
     {
-        Contacts *contact = [[Contacts alloc] init];
-        contact.name = self.nameTextField.text;
-        contact.tel = self.telTextField.text;
-        
-        [contact insertWithCompletion:^(NSError *error) {
-            if (error)
-            {
-                NSLog(@"%@", error);
-            }
-            else
-            {
-                [self.navigationController popViewControllerAnimated:YES];
-            }
-        }];
+        if (self.mode == ContactStyle_add)
+        {
+            Contacts *contact = [[Contacts alloc] init];
+            contact.name = self.nameTextField.text;
+            contact.tel = self.telTextField.text;
+            contact.address = self.addressTextField.text;
+            
+            [contact insertWithCompletion:^(NSError *error) {
+                if (error)
+                {
+                    NSLog(@"%@", error);
+                }
+                else
+                {
+                    [self.navigationController popViewControllerAnimated:YES];
+                }
+            }];
+        }
+        else
+        {
+            self.contact.name = self.nameTextField.text;
+            self.contact.address = self.addressTextField.text;
+            [self.contact updateWithCompletion:^(NSError *error) {
+                if (error)
+                {
+                    NSLog(@"%@", error);
+                }
+                else
+                {
+                    [self.navigationController popViewControllerAnimated:YES];
+                }
+            }];
+        }
     }
     else
     {
@@ -49,7 +75,10 @@
     }
 }
 
-
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
+{
+    [self.view endEditing:YES];
+}
 
 
 - (void)didReceiveMemoryWarning

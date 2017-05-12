@@ -8,6 +8,20 @@
 
 #import <UIKit/UIKit.h>
 
+
+typedef NS_ENUM(NSUInteger , ContactStyle)
+{
+    ContactStyle_add,
+    ContactStyle_edit
+};
+
+@class Contacts;
+
 @interface AddContantViewController : UIViewController
+
+@property (assign , nonatomic) ContactStyle mode;
+@property (strong , nonatomic) Contacts *contact;
+
+
 
 @end

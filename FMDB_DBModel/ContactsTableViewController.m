@@ -7,6 +7,7 @@
 //
 
 #import "ContactsTableViewController.h"
+#import "AddContantViewController.h"
 #import "Contacts.h"
 
 @interface ContactsTableViewController ()
@@ -38,9 +39,41 @@
 
 - (IBAction)addContact:(UIBarButtonItem *)sender
 {
-    [self performSegueWithIdentifier:@"add" sender:nil];
+    [self performSegueWithIdentifier:@"add" sender:@{@"style":@(ContactStyle_add)}];
 }
 
+- (IBAction)removeAllContact:(UIBarButtonItem *)sender
+{
+    if (!self.list.count)
+    {
+        return ;
+    }
+    
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"删除" message:@"是否全部删除" preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"Yes" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+        [Contacts deleteObjects:[self.list copy] completion:^(NSError *error) {
+            if (error)
+            {
+                NSLog(@"%@", error);
+            }
+            else
+            {
+                [self.list removeAllObjects];
+                [self.tableView reloadData];
+            }
+        }];
+    }];
+    
+    UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"No" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        
+    }];
+    
+    [alert addAction:ok];
+    [alert addAction:cancel];
+    
+    [self presentViewController:alert animated:YES completion:nil];
+}
 
 
 
@@ -57,6 +90,10 @@
     return self.list.count;
 }
 
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 50.0f;
+}
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -73,7 +110,8 @@
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
-    
+    Contacts *contact = [self.list objectAtIndex:indexPath.row];
+    [self performSegueWithIdentifier:@"add" sender:@{@"obj":contact, @"style":@(ContactStyle_edit)}];
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
@@ -116,7 +154,12 @@
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    
+    if ([segue.identifier isEqualToString:@"add"])
+    {
+        AddContantViewController *contactViewController = [segue destinationViewController];
+        contactViewController.mode = (ContactStyle)[[sender objectForKey:@"style"] unsignedIntegerValue];
+        contactViewController.contact = [sender objectForKey:@"obj"];
+    }
 }
 
 
