@@ -7,8 +7,8 @@
 //
 
 #import "SQLStringCreator.h"
-#import "ObjcProperty+SQL.h"
 #import "NSObject+Runtime.h"
+
 
 @implementation SQLStringCreator
 
@@ -71,6 +71,21 @@
     return [sql copy];
 }
 
+
+- (NSString *)sql_alterTable:(NSString *)tableName addColumn:(ObjcProperty *)column
+{
+    if (!tableName || !column)
+    {
+        NSLog(@"%s:表名称:%@ 新增列:%@", __func__, tableName, column);
+        return nil;
+    }
+    //转换成sqlite数据类型
+    [column toSqliteType];
+    
+    return [NSString stringWithFormat:@"ALTER TABLE %@ ADD COLUMN %@ %@;", tableName, column.propertyName, column.sqlType];
+}
+
+
 - (NSString *)sql_select:(NSArray <NSString *>*)columns from:(NSString *)tableName where:(NSString *)query
 {
     if (!tableName)
@@ -79,18 +94,28 @@
         return nil;
     }
     
-    NSMutableString *sql = [[NSMutableString alloc] initWithString:@"SELECT "];
-    [sql appendString:[columns componentsJoinedByString:@","]?:@"*"]; //拼接需要查询的字段
-    [sql appendFormat:@" FROM %@", tableName];
-    //拼接where子句
-    if (query.length)
+    SqlCore *sqlCore = [[SqlCore alloc] init];
+    NSMutableString *sql = [[NSString stringWithFormat:@"%@ %@", [sqlCore select:columns], [sqlCore from:tableName]] mutableCopy];
+    if (query)
     {
-        [sql appendFormat:@" WHERE %@", query];
+        [sql appendFormat:@" %@", [sqlCore where:query]];
     }
-    
     [sql appendString:@";"];
     
     return [sql copy];
+}
+
+- (NSString *)sql_select_distinct:(NSArray<NSString *> *)columns from:(NSString *)tableName where:(NSString *)query
+{
+    if (!tableName)
+    {
+        NSLog(@"%s:表名称:%@", __func__, tableName);
+        return nil;
+    }
+    
+    SqlCore *sqlCore = [[SqlCore alloc] init];
+    
+    return [NSString stringWithFormat:@"%@ %@ %@;", [sqlCore select_distinct:columns], [sqlCore from:tableName], [sqlCore where:query]];
 }
 
 - (NSString *)sql_insertInto:(NSString *)tableName values:(NSArray<ObjcProperty *> *)values
@@ -101,21 +126,49 @@
         return nil;
     }
     
-    NSMutableString *sql = [[NSMutableString alloc] initWithFormat:@"INSERT INTO %@ (", tableName];
-    //行名称列表
-    NSMutableArray *columnsList = [NSMutableArray new];
-    //值列表
-    NSMutableArray *valueList = [NSMutableArray new];
-    for (ObjcProperty *pro in values)
+    SqlCore *sql = [[SqlCore alloc] init];
+    
+    return [NSString stringWithFormat:@"INSERT INTO %@ %@;", tableName, [sql values:values]];
+}
+
+- (NSString *)sql_update:(NSString *)tableName set:(NSArray<ObjcProperty *> *)columns where:(NSString *)query
+{
+    if (!tableName || !columns.count)
     {
-        [columnsList addObject:pro.propertyName];
-        [valueList addObject:[NSObject defaultValue:pro.value]];
+        NSLog(@"%s:表名称:%@ values:%@", __func__, tableName, columns);
+        return nil;
     }
     
-    [sql appendFormat:@"%@) VALUES(", [columnsList componentsJoinedByString:@","]];
-    [sql appendFormat:@"%@);", [valueList componentsJoinedByString:@","]];
+    SqlCore *sql = [[SqlCore alloc] init];
+    NSMutableString *sql_update = [[NSString stringWithFormat:@"%@ %@", [sql update:tableName], [sql set:columns]] mutableCopy];
+    if (query)
+    {
+        [sql_update appendFormat:@" %@", [sql where:query]];
+    }
     
-    return [sql copy];
+    [sql_update appendString:@";"];
+    
+    return [sql_update copy];
+}
+
+- (NSString *)sql_delete:(NSString *)tableName where:(NSString *)query
+{
+    if (!tableName)
+    {
+        NSLog(@"%s:表名称:%@", __func__, tableName);
+        return nil;
+    }
+    
+    SqlCore *sql = [[SqlCore alloc] init];
+    NSMutableString *sql_delete = [[NSString stringWithFormat:@"DELETE %@", [sql from:tableName]] mutableCopy];
+    if (query)
+    {
+        [sql_delete appendFormat:@" %@", [sql where:query]];
+    }
+    
+    [sql_delete appendString:@";"];
+    
+    return [sql_delete copy];
 }
 
 

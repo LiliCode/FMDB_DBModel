@@ -16,7 +16,14 @@
 
  @return 返回ObjcProperty对象的列表
  */
-- (NSArray <ObjcProperty *>*)getPropertyList;
++ (NSArray <ObjcProperty *>*)getPropertyList;
+
+/**
+ 设置属性值
+
+ @param values ObjcProperty对象列表
+ */
+- (void)setValues:(NSArray <ObjcProperty *>*)values;
 
 @end
 

@@ -10,4 +10,15 @@
 
 @implementation Contacts
 
+
+- (ObjcProperty *)sql_primaryKey
+{
+    ObjcProperty *pKey = [[ObjcProperty alloc] init];
+    pKey.propertyName = @"tel";
+    pKey.objcType = ObjcTypeNSString;
+    
+    return pKey;
+}
+
+
 @end

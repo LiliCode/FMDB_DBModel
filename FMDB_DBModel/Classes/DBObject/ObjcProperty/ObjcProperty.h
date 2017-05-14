@@ -28,6 +28,7 @@ typedef NS_ENUM(NSUInteger , ObjcPropertyReferenceMode)
 /* Objc基本数据类型 */
 
 FOUNDATION_EXPORT NSString *const ObjcTypeChar;         //字符、布尔
+FOUNDATION_EXPORT NSString *const ObjcTypeBool;         //布尔类型
 FOUNDATION_EXPORT NSString *const ObjcTypeUnsigendChar;
 FOUNDATION_EXPORT NSString *const ObjcTypeInt;
 FOUNDATION_EXPORT NSString *const ObjcTypeUnsignedInt;
@@ -43,6 +44,8 @@ FOUNDATION_EXPORT NSString *const ObjcTypePointer;      //指针类型
 FOUNDATION_EXPORT NSString *const ObjcTypeAnyObject;    //任意类型 id
 FOUNDATION_EXPORT NSString *const ObjcTypeNSNumber;
 FOUNDATION_EXPORT NSString *const ObjcTypeNSString;
+FOUNDATION_EXPORT NSString *const ObjcTypeNSArray;
+FOUNDATION_EXPORT NSString *const ObjcTypeNSMutableArray;
 
 
 

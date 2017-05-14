@@ -10,20 +10,20 @@
 
 @implementation NSObject (Runtime)
 
-- (NSArray<ObjcProperty *> *)getPropertyList
++ (NSArray<ObjcProperty *> *)getPropertyList
 {
     //属性个数
     unsigned int count = 0;
     NSMutableArray *list = [NSMutableArray new];
     //获取属性列表
-    objc_property_t *propertyList = class_copyPropertyList(self.class, &count);
+    objc_property_t *propertyList = class_copyPropertyList([self class], &count);
     
     for (unsigned int i = 0; i < count; i++)
     {
         //创建属性类型
         ObjcProperty *objc_ppt = [ObjcProperty objcProperty:*(propertyList + i)];
         //获取属性值
-        objc_ppt.value = [self valueForKey:objc_ppt.propertyName];
+//        objc_ppt.value = [self valueForKey:objc_ppt.propertyName];
         //存入数组
         [list addObject:objc_ppt];
     }
@@ -34,8 +34,21 @@
     return [list copy];
 }
 
+- (void)setValues:(NSArray<ObjcProperty *> *)values
+{
+    for (ObjcProperty *objc_ppt in values)
+    {
+        //获取属性值
+        objc_ppt.value = [self valueForKey:objc_ppt.propertyName];
+    }
+}
+
 
 @end
+
+
+
+
 
 
 
