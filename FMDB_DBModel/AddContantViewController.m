@@ -35,39 +35,21 @@
 {
     if (self.nameTextField.text.length && self.telTextField.text.length)
     {
-        if (self.mode == ContactStyle_add)
-        {
-            Contacts *contact = [[Contacts alloc] init];
-            contact.name = self.nameTextField.text;
-            contact.tel = self.telTextField.text;
-            contact.address = self.addressTextField.text;
-            
-            [contact insertWithCompletion:^(NSError *error) {
-                if (error)
-                {
-                    NSLog(@"%@", error);
-                }
-                else
-                {
-                    [self.navigationController popViewControllerAnimated:YES];
-                }
-            }];
-        }
-        else
-        {
-            self.contact.name = self.nameTextField.text;
-            self.contact.address = self.addressTextField.text;
-            [self.contact updateWithCompletion:^(NSError *error) {
-                if (error)
-                {
-                    NSLog(@"%@", error);
-                }
-                else
-                {
-                    [self.navigationController popViewControllerAnimated:YES];
-                }
-            }];
-        }
+        Contacts *contact = [[Contacts alloc] init];
+        contact.name = self.nameTextField.text;
+        contact.tel = self.telTextField.text;
+        contact.address = self.addressTextField.text;
+        
+        [contact saveWithCompletion:^(NSError *error) {
+            if (error)
+            {
+                NSLog(@"%@", error);
+            }
+            else
+            {
+                [self.navigationController popViewControllerAnimated:YES];
+            }
+        }];
     }
     else
     {

@@ -11,7 +11,7 @@
 @implementation Contacts
 
 
-- (ObjcProperty *)sql_primaryKey
++ (ObjcProperty *)sql_primaryKey
 {
     ObjcProperty *pKey = [[ObjcProperty alloc] init];
     pKey.propertyName = @"tel";
@@ -22,3 +22,4 @@
 
 
 @end
+

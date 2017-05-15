@@ -24,6 +24,13 @@
  */
 + (instancetype)creator;
 
+/**
+ 设置主键
+
+ @param pKey 主键ObjcProperty对象
+ */
+- (void)setPrimaryKey:(ObjcProperty *)pKey;
+
 
 /**
  生成创建表的SQL语句

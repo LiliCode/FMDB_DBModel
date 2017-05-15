@@ -11,21 +11,21 @@
 
 @protocol DBSQL <NSObject>
 
-@optional
-
+@required
 /**
  设置主键
 
  @return 返回主键字符串
  */
-- (ObjcProperty *)sql_primaryKey;
++ (ObjcProperty *)sql_primaryKey;
 
+@optional
 /**
  过滤实体类中不需要持久化的字段
 
  @return 返回需要过滤的字段列表
  */
-- (NSArray *)sql_filterColumn;
++ (NSArray *)sql_filterColumn;
 
 
 @end
@@ -92,16 +92,45 @@
  */
 + (void)saveObjects:(NSArray *)objects completion:(void (^)(NSError *error))completion;
 
+/**
+ 插入一条数据
+ */
 - (void)insert;
 
+/**
+ 插入一条数据
+
+ @param completion 插入完成的回调，error = nil 插入成功
+ */
 - (void)insertWithCompletion:(void (^)(NSError *error))completion;
 
+/**
+ 批量插入数据
+
+ @param objects DBObject子类对象
+ @param completion 插入完成的回调，error = nil 插入成功
+ */
 + (void)insertObjects:(NSArray *)objects completion:(void (^)(NSError *error))completion;
 
+
+/**
+ 更新数据
+ */
 - (void)update;
 
+/**
+ 更新数据
+
+ @param completion 更新完成的回调，error = nil 更新成功
+ */
 - (void)updateWithCompletion:(void (^)(NSError *error))completion;
 
+/**
+ 批量更新数据
+
+ @param objects DBObject子类对象
+ @param completion 更新完成的回调，error = nil 更新成功
+ */
 + (void)updateObjects:(NSArray *)objects completion:(void (^)(NSError *error))completion;
 
 #pragma mark - 删除数据

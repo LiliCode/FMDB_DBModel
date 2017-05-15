@@ -52,6 +52,10 @@
     
     //创建SQL
     SQLStringCreator *sql = [SQLStringCreator creator];
+    if ([self.class respondsToSelector:@selector(sql_primaryKey)])
+    {
+        [sql setPrimaryKey:[self.class sql_primaryKey]];    //获取主键
+    }
     //执行SQL
     if (![db executeUpdate:[sql sql_createTable:tableName ifNotExists:YES columns:parameter]])
     {
@@ -156,30 +160,34 @@
 
 - (void)saveWithCompletion:(void (^)(NSError *))completion
 {
-    if ([self respondsToSelector:@selector(sql_primaryKey)] && [self sql_primaryKey])
+    if ([self.class respondsToSelector:@selector(sql_primaryKey)] && [self.class sql_primaryKey])
     {
-        ObjcProperty *pKey = [self sql_primaryKey];
+        ObjcProperty *pKey = [self.class sql_primaryKey];
+        pKey.value = [self valueForKey:pKey.propertyName];
         NSString *query = [NSString stringWithFormat:@"%@=%@", pKey.propertyName, pKey.value];
-        [[DBHelper sharedInstance].databaseQueue inDatabase:^(FMDatabase *db) {
+        FMDatabaseQueue *saveQueue = [FMDatabaseQueue databaseQueueWithPath:[[DBHelper sharedInstance] databasePath]];
+        [saveQueue inDatabase:^(FMDatabase *db) {
             SQLStringCreator *sql = [SQLStringCreator creator];
             //先查找是否有这条数据
             FMResultSet *result = [db executeQuery:[sql sql_select:@[pKey.propertyName] from:NSStringFromClass(self.class) where:query]];
             if ([result next])
             {
-                //有这条数据 更新
+                [result close]; //关闭查询结果，否则保存出错
+                
+                //有这条数据就更新
                 [self updateWithCompletion:completion];
             }
             else
             {
-                //没有这条数据 保存
-                [self insertWithCompletion:nil];
+                //没有这条数据就保存
+                [self insertWithCompletion:completion];
             }
         }];
     }
     else
     {
         //没有主键，直接保存
-        [self insertWithCompletion:nil];
+        [self insertWithCompletion:completion];
     }
 }
 
@@ -218,7 +226,7 @@
         {
             if (completion)
             {
-                completion([NSError errorWithDomain:sql_it code:0 userInfo:@{NSLocalizedDescriptionKey:@"数据插入失败"}]);
+                completion([db lastError]);
             }
         }
         else
@@ -262,9 +270,9 @@
     [[DBHelper sharedInstance].databaseQueue inDatabase:^(FMDatabase *db) {
         SQLStringCreator *sql = [SQLStringCreator creator];
         //先查找是否有这条数据
-        if ([self respondsToSelector:@selector(sql_primaryKey)] && [self sql_primaryKey])
+        if ([self.class respondsToSelector:@selector(sql_primaryKey)] && [self.class sql_primaryKey])
         {
-            ObjcProperty *pKey = [self sql_primaryKey];
+            ObjcProperty *pKey = [self.class sql_primaryKey];
             NSString *query = [NSString stringWithFormat:@"%@=%@", pKey.propertyName, [self valueForKey:pKey.propertyName]];
             //去除主键
             NSMutableArray *mPropertys = [propertys mutableCopy];
@@ -277,12 +285,12 @@
                 }
             }
             //执行SQL
-            NSString *sql_ud = [sql sql_update:NSStringFromClass(self.class) set:propertys where:query];
+            NSString *sql_ud = [sql sql_update:NSStringFromClass(self.class) set:[mPropertys copy] where:query];
             if (![db executeUpdate:sql_ud])
             {
                 if (completion)
                 {
-                    completion([NSError errorWithDomain:sql_ud code:0 userInfo:@{NSLocalizedDescriptionKey:@"数据修改失败"}]);
+                    completion([db lastError]);
                 }
             }
             else
@@ -323,14 +331,19 @@
 {
     [[DBHelper sharedInstance].databaseQueue inDatabase:^(FMDatabase *db) {
         SQLStringCreator *sql = [SQLStringCreator creator];
-        ObjcProperty *pKey = [self sql_primaryKey];
+        ObjcProperty *pKey = nil;
+        if ([self.class respondsToSelector:@selector(sql_primaryKey)] && [self.class sql_primaryKey])
+        {
+            pKey = [self.class sql_primaryKey];
+        }
+        
         NSString *query = [NSString stringWithFormat:@"%@=%@", pKey.propertyName, [self valueForKey:pKey.propertyName]];
         NSString *sql_d = [sql sql_delete:NSStringFromClass(self.class) where:query];
         if (![db executeUpdate:sql_d])
         {
             if (completion)
             {
-                completion([NSError errorWithDomain:sql_d code:0 userInfo:@{NSLocalizedDescriptionKey:@"删除数据失败"}]);
+                completion([db lastError]);
             }
         }
         else

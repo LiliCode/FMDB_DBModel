@@ -9,12 +9,21 @@
 #import "SQLStringCreator.h"
 #import "NSObject+Runtime.h"
 
+@interface SQLStringCreator ()
+@property (strong , nonatomic) ObjcProperty *pKey;
+
+@end
 
 @implementation SQLStringCreator
 
 + (instancetype)creator
 {
     return [[self alloc] init];
+}
+
+- (void)setPrimaryKey:(ObjcProperty *)pKey
+{
+    self.pKey = pKey;
 }
 
 - (NSString *)sql_createTable:(NSString *)tableName ifNotExists:(BOOL)ine columns:(NSArray <ObjcProperty *>*)columns
@@ -41,7 +50,13 @@
     for (ObjcProperty *pro in columns)
     {
         [pro toSqliteType]; //属性数据类型转换成Sqlite数据类型
-        [argsList addObject:[NSString stringWithFormat:@"%@ %@", pro.propertyName, pro.sqlType]];
+        NSString *constaraint = @"";
+        if ([pro.propertyName isEqualToString:self.pKey.propertyName])  //如果是主键，拼接约束
+        {
+            constaraint = @" PRIMARY KEY"; // -> uid INTEGER PRIMARY KEY
+        }
+        
+        [argsList addObject:[NSString stringWithFormat:@"%@ %@%@", pro.propertyName, pro.sqlType, constaraint]];
     }
     //拼接参数
     [sql appendString:[argsList componentsJoinedByString:@","]];
