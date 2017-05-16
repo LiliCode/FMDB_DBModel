@@ -30,18 +30,54 @@
                                     <segue destination="gFt-wz-W6n" kind="show" id="JHb-eH-9pb"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fl3-jT-U3d">
+                                <rect key="frame" x="111" y="324" width="98" height="32"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <state key="normal" title="批量插入数据"/>
+                                <connections>
+                                    <action selector="insertList:" destination="BYZ-38-t0r" eventType="touchUpInside" id="uMm-md-HGw"/>
+                                </connections>
+                            </button>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" userInteractionEnabled="NO" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="BJD-jU-VEd">
+                                <rect key="frame" x="16" y="72" width="288" height="171"/>
+                                <color key="backgroundColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="171" id="oBn-oG-na2"/>
+                                </constraints>
+                                <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                            </textView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="zdY-03-oCa">
+                                <rect key="frame" x="111" y="363" width="98" height="32"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <state key="normal" title="批量修改数据"/>
+                                <connections>
+                                    <action selector="updateList:" destination="BYZ-38-t0r" eventType="touchUpInside" id="OXJ-Bv-df9"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="BJD-jU-VEd" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="8" id="6fY-GM-a52"/>
+                            <constraint firstItem="zdY-03-oCa" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Gg9-kT-70b"/>
+                            <constraint firstAttribute="trailing" secondItem="BJD-jU-VEd" secondAttribute="trailing" constant="16" id="NCb-id-3V0"/>
+                            <constraint firstItem="fl3-jT-U3d" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Wsn-4E-H1f"/>
+                            <constraint firstItem="fl3-jT-U3d" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" constant="56" id="YpJ-qQ-ZXt"/>
+                            <constraint firstItem="BJD-jU-VEd" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="16" id="bX1-zr-1An"/>
                             <constraint firstItem="siY-LI-zbJ" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="sh0-ly-A0b"/>
                             <constraint firstItem="siY-LI-zbJ" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="xhS-D8-Ykx"/>
+                            <constraint firstItem="zdY-03-oCa" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" constant="95" id="ykT-yj-rN2"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="基于FMDB的模型操作Sqlite" id="tcY-SP-0vy"/>
+                    <connections>
+                        <outlet property="consoleView" destination="BJD-jU-VEd" id="Iz7-UL-MEg"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1398" y="793"/>
+            <point key="canvasLocation" x="1396.875" y="792.25352112676057"/>
         </scene>
         <!--Contacts-->
         <scene sceneID="c6B-JQ-LE2">

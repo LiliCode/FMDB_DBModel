@@ -11,7 +11,7 @@
 
 @protocol DBSQL <NSObject>
 
-@required
+@optional
 /**
  设置主键
 
@@ -19,7 +19,6 @@
  */
 + (ObjcProperty *)sql_primaryKey;
 
-@optional
 /**
  过滤实体类中不需要持久化的字段
 

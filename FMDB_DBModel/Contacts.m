@@ -8,16 +8,24 @@
 
 #import "Contacts.h"
 
+@interface Contacts ()
+@property (copy , nonatomic) NSString *school;
+@property (copy , nonatomic) NSString *birthday;
+@property (copy , nonatomic) NSString *enterprise;
+
+@end
+
 @implementation Contacts
 
 
 + (ObjcProperty *)sql_primaryKey
 {
-    ObjcProperty *pKey = [[ObjcProperty alloc] init];
-    pKey.propertyName = @"tel";
-    pKey.objcType = ObjcTypeNSString;
-    
-    return pKey;
+    return [ObjcProperty objcPropertyName:@"tel" objcType:ObjcTypeNSString value:nil];
+}
+
++ (NSArray *)sql_filterColumn
+{
+    return @[@"school", @"birthday", @"enterprise"];
 }
 
 

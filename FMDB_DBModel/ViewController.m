@@ -13,6 +13,7 @@
 
 
 @interface ViewController ()
+@property (weak, nonatomic) IBOutlet UITextView *consoleView;
 
 @end
 
@@ -54,6 +55,58 @@
 #endif
     
 }
+
+- (IBAction)insertList:(UIButton *)sender
+{
+    NSMutableArray *list = [[NSMutableArray alloc] init];
+    
+    for (int i = 0; i < 5; i++)
+    {
+        Contacts *contact = [[Contacts alloc] init];
+        contact.name = [NSString stringWithFormat:@"User-%u", arc4random() % 1000];
+        contact.tel = [NSString stringWithFormat:@"1828185%u%u%u%u", arc4random() % 9, arc4random() % 9, arc4random() % 9, arc4random() % 9];
+        contact.address = @"九重天";
+        
+        [list addObject:contact];
+    }
+    
+    [Contacts insertObjects:[list copy] completion:^(NSError *error) {
+        if (error)
+        {
+            self.consoleView.text = error.description;
+        }
+        else
+        {
+            self.consoleView.text = @"批量插入contact成功!";
+        }
+    }];
+}
+
+- (IBAction)updateList:(UIButton *)sender
+{
+    //查询全部数据
+    __block NSMutableArray *mResult = [[NSMutableArray alloc] init];
+    [Contacts selectWithCompletion:^(NSArray *result) {
+        [mResult addObjectsFromArray:result];
+    }];
+    
+    for (Contacts *contact in mResult)
+    {
+        contact.name = [NSString stringWithFormat:@"User-%u", arc4random() % 1000];
+    }
+    
+    [Contacts updateObjects:mResult completion:^(NSError *error) {
+        if (error)
+        {
+            self.consoleView.text = error.description;
+        }
+        else
+        {
+            self.consoleView.text = @"批量更改数据成功";
+        }
+    }];
+}
+
 
 
 - (void)didReceiveMemoryWarning

@@ -19,6 +19,10 @@
 
 @interface SqlCore : NSObject
 
+/* 操作符 */
+
+- (NSString *)operator_equal:(ObjcProperty *)objcPro;
+
 /* SELECT */
 
 - (NSString *)select:(NSArray *)cols;

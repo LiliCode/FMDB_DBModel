@@ -51,6 +51,23 @@ NSString *const ObjcTypeNSMutableArray = @"NSMutableArray";
     return self;
 }
 
++ (instancetype)objcPropertyName:(NSString *)proStr objcType:(NSString *)type value:(id)value
+{
+    return [[self alloc] initWithName:proStr objcType:type value:value];
+}
+
+- (instancetype)initWithName:(NSString *)proStr objcType:(NSString *)type value:(id)value
+{
+    if (self = [super init])
+    {
+        self.propertyName = proStr;
+        self.objcType = type;
+        self.value = value;
+    }
+    
+    return self;
+}
+
 - (void)parse_objc_property_t:(objc_property_t)property
 {
     //属性名称

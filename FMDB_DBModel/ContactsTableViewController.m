@@ -33,6 +33,8 @@
         {
             self.list = [result mutableCopy];
             [self.tableView reloadData];
+            
+            self.title = [NSString stringWithFormat:@"Contacts / %lu", result.count];
         }
     }];
 }

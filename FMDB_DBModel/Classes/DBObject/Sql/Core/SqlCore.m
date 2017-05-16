@@ -26,6 +26,22 @@
 @implementation SqlCore
 
 
+- (NSString *)operator_equal:(ObjcProperty *)objcPro
+{
+    NSString *keyValue = nil;
+    if ([objcPro.objcType isEqualToString:ObjcTypeNSString])
+    {
+        keyValue = [NSString stringWithFormat:@"%@=\'%@\'", objcPro.propertyName, [[objcPro defaultValue] value]];
+    }
+    else
+    {
+        keyValue = [NSString stringWithFormat:@"%@=%@", objcPro.propertyName, [[objcPro defaultValue] value]];
+    }
+    
+    return keyValue;
+}
+
+
 /* SELECT */
 
 - (NSString *)select:(NSArray *)cols
@@ -91,17 +107,7 @@
     NSMutableArray *values = [[NSMutableArray alloc] init];
     for (ObjcProperty *pro in columns)
     {
-        NSString *keyValue = nil;
-        if ([pro.objcType isEqualToString:ObjcTypeNSString])
-        {
-            keyValue = [NSString stringWithFormat:@"%@=\'%@\'", pro.propertyName, [[pro defaultValue] value]];
-        }
-        else
-        {
-            keyValue = [NSString stringWithFormat:@"%@=%@", pro.propertyName, [[pro defaultValue] value]];
-        }
-        
-        [values addObject:keyValue];
+        [values addObject:[self operator_equal:pro]];
     }
     
     [sql_set appendString:[values componentsJoinedByString:@","]];

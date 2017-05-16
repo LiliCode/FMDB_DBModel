@@ -24,9 +24,45 @@
 
 + (NSArray *)getAllProperty
 {
+    NSMutableArray *columns = [[NSMutableArray alloc] init];
+    //获取实体类全部字段
+    NSArray *propertys = [self.class getPropertyList];
     //过滤不需要的字段
+    if ([self.class respondsToSelector:@selector(sql_filterColumn)])
+    {
+        NSMutableArray *filterList = [[self.class sql_filterColumn] mutableCopy];
+        if (filterList.count)
+        {
+            for (ObjcProperty *pro in propertys)
+            {
+                BOOL isExists = NO;
+                for (NSString *filterColumn in filterList)
+                {
+                    if ([pro.propertyName isEqualToString:filterColumn])
+                    {
+                        isExists = YES;
+                        [filterList removeObject:filterColumn];
+                        break;
+                    }
+                }
+                
+                if (!isExists)
+                {
+                    [columns addObject:pro];
+                }
+            }
+        }
+        else
+        {
+            [columns addObjectsFromArray:propertys];
+        }
+    }
+    else
+    {
+        [columns addObjectsFromArray:propertys];
+    }
     
-    return [self.class getPropertyList];
+    return [columns copy];
 }
 
 + (BOOL)createTable
@@ -164,7 +200,8 @@
     {
         ObjcProperty *pKey = [self.class sql_primaryKey];
         pKey.value = [self valueForKey:pKey.propertyName];
-        NSString *query = [NSString stringWithFormat:@"%@=%@", pKey.propertyName, pKey.value];
+        SqlCore *sqlcore = [[SqlCore alloc] init];
+        NSString *query = [sqlcore operator_equal:pKey];
         FMDatabaseQueue *saveQueue = [FMDatabaseQueue databaseQueueWithPath:[[DBHelper sharedInstance] databasePath]];
         [saveQueue inDatabase:^(FMDatabase *db) {
             SQLStringCreator *sql = [SQLStringCreator creator];
@@ -241,20 +278,34 @@
 
 + (void)insertObjects:(NSArray *)objects completion:(void (^)(NSError *error))completion
 {
-    for (DBObject *object in objects)
-    {
-        [object insertWithCompletion:^(NSError *error) {
-            if (error)
+    [[DBHelper sharedInstance].databaseQueue inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        BOOL err = NO;
+        for (DBObject *entity in objects)
+        {
+            NSArray *propertys = [entity.class getAllProperty];
+            [entity setValues:propertys];
+            SQLStringCreator *sql = [SQLStringCreator creator];
+            NSString *sql_it = [sql sql_insertInto:NSStringFromClass(entity.class) values:propertys];
+            if (![db executeUpdate:sql_it])
             {
-                NSLog(@"%@", error.description);
+                NSLog(@"%@", [db lastError]);
+                err = YES;
+                *rollback = YES;
             }
-        }];
-    }
-    
-    if (completion)
-    {
-        completion(nil);
-    }
+        }
+        
+        if (completion)
+        {
+            if (err)
+            {
+                completion([db lastError]);
+            }
+            else
+            {
+                completion(nil);
+            }
+        }
+    }];
 }
 
 
@@ -273,7 +324,9 @@
         if ([self.class respondsToSelector:@selector(sql_primaryKey)] && [self.class sql_primaryKey])
         {
             ObjcProperty *pKey = [self.class sql_primaryKey];
-            NSString *query = [NSString stringWithFormat:@"%@=%@", pKey.propertyName, [self valueForKey:pKey.propertyName]];
+            pKey.value = [self valueForKey:pKey.propertyName];
+            SqlCore *sqlcore = [[SqlCore alloc] init];
+            NSString *query = [sqlcore operator_equal:pKey];
             //去除主键
             NSMutableArray *mPropertys = [propertys mutableCopy];
             for (ObjcProperty *pro in mPropertys)
@@ -306,20 +359,53 @@
 
 + (void)updateObjects:(NSArray *)objects completion:(void (^)(NSError *))completion
 {
-    for (DBObject *obj in objects)
-    {
-        [obj updateWithCompletion:^(NSError *error) {
-            if (error)
+    [[DBHelper sharedInstance].databaseQueue inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        BOOL err = NO;
+        for (DBObject *entity in objects)
+        {
+            NSArray *propertys = [entity.class getAllProperty];
+            [entity setValues:propertys];
+            SQLStringCreator *sql = [SQLStringCreator creator];
+            //先查找是否有这条数据
+            if ([entity.class respondsToSelector:@selector(sql_primaryKey)] && [entity.class sql_primaryKey])
             {
-                NSLog(@"%@", error.description);
+                ObjcProperty *pKey = [self.class sql_primaryKey];
+                pKey.value = [entity valueForKey:pKey.propertyName];
+                SqlCore *sqlcore = [[SqlCore alloc] init];
+                NSString *query = [sqlcore operator_equal:pKey];
+                //去除主键
+                NSMutableArray *mPropertys = [propertys mutableCopy];
+                for (ObjcProperty *pro in mPropertys)
+                {
+                    if ([pro.propertyName isEqualToString:pKey.propertyName])
+                    {
+                        [mPropertys removeObject:pro];
+                        break;
+                    }
+                }
+                //执行SQL
+                NSString *sql_ud = [sql sql_update:NSStringFromClass(self.class) set:[mPropertys copy] where:query];
+                if (![db executeUpdate:sql_ud])
+                {
+                    NSLog(@"%@", [db lastError]);
+                    err = YES;
+                    *rollback = YES;    //回滚事务
+                }
             }
-        }];
-    }
-    
-    if (completion)
-    {
-        completion(nil);
-    }
+        }
+        
+        if (completion)
+        {
+            if (err)
+            {
+                completion([db lastError]);
+            }
+            else
+            {
+                completion(nil);
+            }
+        }
+    }];
 }
 
 - (void)deleteObject
@@ -335,9 +421,11 @@
         if ([self.class respondsToSelector:@selector(sql_primaryKey)] && [self.class sql_primaryKey])
         {
             pKey = [self.class sql_primaryKey];
+            pKey.value = [self valueForKey:pKey.propertyName];
         }
         
-        NSString *query = [NSString stringWithFormat:@"%@=%@", pKey.propertyName, [self valueForKey:pKey.propertyName]];
+        SqlCore *sqlcore = [[SqlCore alloc] init];
+        NSString *query = [sqlcore operator_equal:pKey];
         NSString *sql_d = [sql sql_delete:NSStringFromClass(self.class) where:query];
         if (![db executeUpdate:sql_d])
         {
@@ -358,20 +446,42 @@
 
 + (void)deleteObjects:(NSArray *)objects completion:(void (^)(NSError *))completion
 {
-    for (DBObject *obj in objects)
-    {
-        [obj deleteObjectWithCompletion:^(NSError *error) {
-            if (error)
+    [[DBHelper sharedInstance].databaseQueue inTransaction:^(FMDatabase *db, BOOL *rollback) {
+        BOOL err = NO;  //保存在sql执行中出错的状态
+        for (DBObject *entity in objects)
+        {
+            SQLStringCreator *sql = [SQLStringCreator creator];
+            ObjcProperty *pKey = nil;
+            if ([entity.class respondsToSelector:@selector(sql_primaryKey)] && [entity.class sql_primaryKey])
             {
-                NSLog(@"%@", error.description);
+                pKey = [entity.class sql_primaryKey];
+                pKey.value = [entity valueForKey:pKey.propertyName];
             }
-        }];
-    }
-    
-    if (completion)
-    {
-        completion(nil);
-    }
+            
+            SqlCore *sqlcore = [[SqlCore alloc] init];
+            NSString *query = [sqlcore operator_equal:pKey];
+            NSString *sql_d = [sql sql_delete:NSStringFromClass(entity.class) where:query];
+            if (![db executeUpdate:sql_d])
+            {
+                NSLog(@"%@", [db lastError]);
+                err = YES;      //已经出错
+                *rollback = YES;//事物回滚
+                break;
+            }
+        }
+        
+        if (completion)
+        {
+            if (err)
+            {
+                completion([db lastError]);
+            }
+            else
+            {
+                completion(nil);
+            }
+        }
+    }];
 }
 
 

@@ -73,6 +73,15 @@ FOUNDATION_EXPORT NSString *const ObjcTypeNSMutableArray;
  */
 + (instancetype)objcProperty:(objc_property_t)property;
 
+/**
+ 利用字符串构造属性对象
+
+ @param proStr 属性名称
+ @param type 属性类型
+ @param value 属性值
+ @return 返回构造成功的对象
+ */
++ (instancetype)objcPropertyName:(NSString *)proStr objcType:(NSString *)type value:(id)value;
 
 /**
  默认值

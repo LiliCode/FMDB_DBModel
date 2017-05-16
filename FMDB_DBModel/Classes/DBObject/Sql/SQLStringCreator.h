@@ -31,7 +31,6 @@
  */
 - (void)setPrimaryKey:(ObjcProperty *)pKey;
 
-
 /**
  生成创建表的SQL语句
 
