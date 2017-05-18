@@ -13,6 +13,7 @@
 @property (weak, nonatomic) IBOutlet UITextField *nameTextField;
 @property (weak, nonatomic) IBOutlet UITextField *telTextField;
 @property (weak, nonatomic) IBOutlet UITextField *addressTextField;
+@property (weak, nonatomic) IBOutlet UILabel *updateDateLabel;
 
 @end
 
@@ -28,6 +29,11 @@
         self.telTextField.text = self.contact.tel;
         self.addressTextField.text = self.contact.address;
         self.telTextField.enabled = NO;
+        NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+        [formatter setDateFormat:@"YYYY-MM-dd hh:mm:ss"];
+        self.updateDateLabel.text = [NSString stringWithFormat:@"修改日期：%@", [formatter stringFromDate:self.contact.updateDate]];
+        
+        NSLog(@"%@", self.contact.books);
     }
 }
 
@@ -39,6 +45,9 @@
         contact.name = self.nameTextField.text;
         contact.tel = self.telTextField.text;
         contact.address = self.addressTextField.text;
+        [contact.books addObject:@"<<jian.ai>>"];
+        [contact.books addObject:@"<<C++>>"];
+        [contact.books addObject:@"<<Swift>>"];
         
         [contact saveWithCompletion:^(NSError *error) {
             if (error)

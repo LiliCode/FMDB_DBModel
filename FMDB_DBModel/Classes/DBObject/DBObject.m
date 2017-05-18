@@ -166,7 +166,16 @@
                 }
                 else if ([pro.sqlType isEqualToString:[SQL_INTEGER copy]])
                 {
-                    [entity setValue:@([result longLongIntForColumn:pro.propertyName]) forKey:pro.propertyName];
+                    if ([pro.objcType isEqualToString:ObjcTypeNSDate])
+                    {
+                        //日期
+                        NSDate *date = [NSDate dateWithTimeIntervalSince1970:[result longLongIntForColumn:pro.propertyName]];
+                        [entity setValue:date forKey:pro.propertyName];
+                    }
+                    else
+                    {
+                        [entity setValue:@([result longLongIntForColumn:pro.propertyName]) forKey:pro.propertyName];
+                    }
                 }
                 else if ([pro.sqlType isEqualToString:[SQL_REAL copy]])
                 {
@@ -174,7 +183,9 @@
                 }
                 else if ([pro.sqlType isEqualToString:[SQL_BLOB copy]])
                 {
-                    // TODO...
+                    //解档
+                    id blob = [NSKeyedUnarchiver unarchiveObjectWithData:[result dataForColumn:pro.propertyName]];
+                    [entity setValue:blob forKey:pro.propertyName];
                 }
             }
             //添加到数组
@@ -256,10 +267,16 @@
 {
     NSArray *propertys = [self.class getAllProperty];
     [self setValues:propertys];
+    NSMutableArray *values = [[NSMutableArray alloc] init];
+    for (ObjcProperty *pro in propertys)
+    {
+        [values addObject:[[pro defaultValue] value]];
+    }
+    
     [[DBHelper sharedInstance].databaseQueue inDatabase:^(FMDatabase *db) {
         SQLStringCreator *sql = [SQLStringCreator creator];
         NSString *sql_it = [sql sql_insertInto:NSStringFromClass(self.class) values:propertys];
-        if (![db executeUpdate:sql_it])
+        if (![db executeUpdate:sql_it withArgumentsInArray:[values copy]])
         {
             if (completion)
             {
@@ -284,9 +301,14 @@
         {
             NSArray *propertys = [entity.class getAllProperty];
             [entity setValues:propertys];
+            NSMutableArray *values = [[NSMutableArray alloc] init];
+            for (ObjcProperty *pro in propertys)
+            {
+                [values addObject:[[pro defaultValue] value]];
+            }
             SQLStringCreator *sql = [SQLStringCreator creator];
             NSString *sql_it = [sql sql_insertInto:NSStringFromClass(entity.class) values:propertys];
-            if (![db executeUpdate:sql_it])
+            if (![db executeUpdate:sql_it withArgumentsInArray:[values copy]])
             {
                 NSLog(@"%@", [db lastError]);
                 err = YES;
@@ -337,9 +359,15 @@
                     break;
                 }
             }
+            //提取值
+            NSMutableArray *values = [[NSMutableArray alloc] init];
+            for (ObjcProperty *pro in mPropertys)
+            {
+                [values addObject:[[pro defaultValue] value]];
+            }
             //执行SQL
             NSString *sql_ud = [sql sql_update:NSStringFromClass(self.class) set:[mPropertys copy] where:query];
-            if (![db executeUpdate:sql_ud])
+            if (![db executeUpdate:sql_ud withArgumentsInArray:[values copy]])
             {
                 if (completion)
                 {
@@ -383,9 +411,15 @@
                         break;
                     }
                 }
+                //提取值
+                NSMutableArray *values = [[NSMutableArray alloc] init];
+                for (ObjcProperty *pro in mPropertys)
+                {
+                    [values addObject:[[pro defaultValue] value]];
+                }
                 //执行SQL
                 NSString *sql_ud = [sql sql_update:NSStringFromClass(self.class) set:[mPropertys copy] where:query];
-                if (![db executeUpdate:sql_ud])
+                if (![db executeUpdate:sql_ud withArgumentsInArray:[values copy]])
                 {
                     NSLog(@"%@", [db lastError]);
                     err = YES;

@@ -92,6 +92,7 @@
     
     for (Contacts *contact in mResult)
     {
+        contact.updateDate = [NSDate date];
         contact.name = [NSString stringWithFormat:@"User-%u", arc4random() % 1000];
     }
     

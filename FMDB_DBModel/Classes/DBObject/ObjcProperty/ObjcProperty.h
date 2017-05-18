@@ -46,6 +46,10 @@ FOUNDATION_EXPORT NSString *const ObjcTypeNSNumber;
 FOUNDATION_EXPORT NSString *const ObjcTypeNSString;
 FOUNDATION_EXPORT NSString *const ObjcTypeNSArray;
 FOUNDATION_EXPORT NSString *const ObjcTypeNSMutableArray;
+FOUNDATION_EXPORT NSString *const ObjcTypeNSDictionary;
+FOUNDATION_EXPORT NSString *const ObjcTypeNSMutableDictionary;
+FOUNDATION_EXPORT NSString *const ObjcTypeNSData;
+FOUNDATION_EXPORT NSString *const ObjcTypeNSDate;
 
 
 

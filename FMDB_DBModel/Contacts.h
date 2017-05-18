@@ -12,12 +12,12 @@
 
 @interface Contacts : DBObject
 
-@property (assign , nonatomic) NSUInteger uid;  //primary key
-@property (copy , nonatomic) NSString *name;    //姓名
-@property (copy , nonatomic) NSString *tel;     //电话
-@property (copy , nonatomic) NSString *address; //地址
-
-
+@property (assign , nonatomic) NSUInteger uid;      //primary key
+@property (copy , nonatomic) NSString *name;        //姓名
+@property (copy , nonatomic) NSString *tel;         //电话
+@property (copy , nonatomic) NSString *address;     //地址
+@property (strong , nonatomic) NSDate *updateDate;  //创建日期
+@property (strong , nonatomic) NSMutableArray *books;
 
 
 @end

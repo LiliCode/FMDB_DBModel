@@ -77,15 +77,9 @@
     NSMutableString *sql_values = [NSMutableString stringWithString:@"VALUES("];
     
     NSMutableArray *values = [[NSMutableArray alloc] init];
-    for (ObjcProperty *pro in valueList)
+    for (NSInteger i = 0; i < valueList.count; i++)
     {
-        id tempObj = [[pro defaultValue] value];
-        if ([pro.objcType isEqualToString:ObjcTypeNSString])
-        {
-            tempObj = [NSString stringWithFormat:@"\'%@\'", [[pro defaultValue] value]];
-        }
-        
-        [values addObject:tempObj];
+        [values addObject:@"?"];
     }
     [sql_values appendString:[values componentsJoinedByString:@","]];   //拼接值
     [sql_values appendString:@")"];
@@ -107,7 +101,7 @@
     NSMutableArray *values = [[NSMutableArray alloc] init];
     for (ObjcProperty *pro in columns)
     {
-        [values addObject:[self operator_equal:pro]];
+        [values addObject:[NSString stringWithFormat:@"%@=?", pro.propertyName]];
     }
     
     [sql_set appendString:[values componentsJoinedByString:@","]];

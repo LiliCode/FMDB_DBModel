@@ -36,7 +36,8 @@ static char *kSqliteTypeKey = "kSqliteTypeKey";
         [self.objcType isEqualToString:ObjcTypeShort] || [self.objcType isEqualToString:ObjcTypeUnsignedShort] ||
         [self.objcType isEqualToString:ObjcTypeLong] || [self.objcType isEqualToString:ObjcTypeUnsigendLong] ||
         [self.objcType isEqualToString:ObjcTypeNSNumber] || [self.objcType isEqualToString:ObjcTypeChar] ||
-        [self.objcType isEqualToString:ObjcTypeUnsigendChar] || [self.objcType isEqualToString:ObjcTypeBool])
+        [self.objcType isEqualToString:ObjcTypeUnsigendChar] || [self.objcType isEqualToString:ObjcTypeBool] ||
+        [self.objcType isEqualToString:ObjcTypeNSDate]) //日期可以转换成int
     {
         self.sqlType = [SQL_INTEGER copy];
     }
@@ -49,7 +50,9 @@ static char *kSqliteTypeKey = "kSqliteTypeKey";
     {
         self.sqlType = [SQL_TEXT copy];
     }
-    else if ([self.objcType isEqualToString:ObjcTypeNSArray] || [self.objcType isEqualToString:ObjcTypeNSMutableArray])
+    else if ([self.objcType isEqualToString:ObjcTypeNSArray] || [self.objcType isEqualToString:ObjcTypeNSMutableArray] ||
+             [self.objcType isEqualToString:ObjcTypeNSDictionary] || [self.objcType isEqualToString:ObjcTypeNSMutableDictionary] ||
+             [self.objcType isEqualToString:ObjcTypeNSData])
     {
         self.sqlType = [SQL_BLOB copy];
     }

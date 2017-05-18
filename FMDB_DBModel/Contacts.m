@@ -17,6 +17,16 @@
 
 @implementation Contacts
 
+- (instancetype)init
+{
+    if (self = [super init])
+    {
+        self.updateDate = [NSDate date];
+        self.books = [[NSMutableArray alloc] init];
+    }
+    
+    return self;
+}
 
 + (ObjcProperty *)sql_primaryKey
 {

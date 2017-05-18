@@ -27,6 +27,10 @@ NSString *const ObjcTypeNSNumber = @"NSNumber";
 NSString *const ObjcTypeNSString = @"NSString";
 NSString *const ObjcTypeNSArray = @"NSArray";
 NSString *const ObjcTypeNSMutableArray = @"NSMutableArray";
+NSString *const ObjcTypeNSDictionary = @"NSDictionary";
+NSString *const ObjcTypeNSMutableDictionary = @"NSMutableDictionary";
+NSString *const ObjcTypeNSData = @"NSData";
+NSString *const ObjcTypeNSDate = @"NSDate";
 
 
 

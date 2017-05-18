@@ -39,7 +39,22 @@
     for (ObjcProperty *objc_ppt in values)
     {
         //获取属性值
-        objc_ppt.value = [self valueForKey:objc_ppt.propertyName];
+        id value = [self valueForKey:objc_ppt.propertyName];
+        if ([objc_ppt.objcType isEqualToString:ObjcTypeNSMutableDictionary] || [objc_ppt.objcType isEqualToString:ObjcTypeNSDictionary ] ||
+            [objc_ppt.objcType isEqualToString:ObjcTypeNSArray] || [objc_ppt.objcType isEqualToString:ObjcTypeNSMutableArray])
+        {
+            objc_ppt.value = [NSKeyedArchiver archivedDataWithRootObject:value];    //归档成二进制文件
+        }
+        else if ([objc_ppt.objcType isEqualToString:ObjcTypeNSDate])
+        {
+            //日期类型转换成整型
+            NSDate *date = value;
+            objc_ppt.value = [NSNumber numberWithInteger:[date timeIntervalSince1970]];  //精确到毫秒
+        }
+        else
+        {
+            objc_ppt.value = [self valueForKey:objc_ppt.propertyName];
+        }
     }
 }
 
