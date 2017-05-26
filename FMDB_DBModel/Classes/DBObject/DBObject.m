@@ -87,13 +87,26 @@
     }
     
     //创建SQL
-    SQLStringCreator *sql = [SQLStringCreator creator];
+    SQLStringCreator *sql = [SQLStringCreator sqlCreator];
+    ObjcProperty *primaryKeyPro = nil;
     if ([self.class respondsToSelector:@selector(sql_primaryKey)])
     {
-        [sql setPrimaryKey:[self.class sql_primaryKey]];    //获取主键
+        primaryKeyPro = [self.class sql_primaryKey];    //获取主键
     }
+    //组建参数
+    NSMutableArray *columns = [NSMutableArray new];
+    for (ObjcProperty *pro in parameter)
+    {
+        [pro toSqliteType];
+        NSString *pKey = @"";
+        if ([pro.propertyName isEqualToString:primaryKeyPro.propertyName])  pKey = @" PRIMARY KEY";
+        
+        NSString *pars = [NSString stringWithFormat:@"%@ %@%@", pro.propertyName, pro.sqlType, pKey];
+        [columns addObject:pars];
+    }
+    
     //执行SQL
-    if (![db executeUpdate:[sql sql_createTable:tableName ifNotExists:YES columns:parameter]])
+    if (![db executeUpdate:sql.create_table(YES, NSStringFromClass([self class]), [columns copy]).end().sql()])
     {
         NSLog(@"%@ 表创建失败!", tableName);
         return NO;
@@ -125,7 +138,8 @@
             if ([pro.propertyName isEqualToString:column])
             {
                 //执行SQL
-                if (![db executeUpdate:[sql sql_alterTable:tableName addColumn:pro]])
+                SQLStringCreator *sql_alter = [SQLStringCreator sqlCreator];
+                if (![db executeUpdate:sql_alter.alter_table(tableName).space().add(pro.propertyName, pro.sqlType).end().sql()])
                 {
                     NSLog(@"%@ 新增字段失败!", tableName);
                     return NO;
@@ -150,8 +164,8 @@
     NSMutableArray *resultList = [[NSMutableArray alloc] init];
     [[DBHelper sharedInstance].databaseQueue inDatabase:^(FMDatabase *db) {
         NSArray *propertys = [self getAllProperty];
-        SQLStringCreator *sql = [SQLStringCreator creator];
-        NSString *sql_sc = [sql sql_select:nil from:NSStringFromClass([self class]) where:query];
+        SQLStringCreator *sql = [SQLStringCreator sqlCreator];
+        NSString *sql_sc = sql.select(nil).space().from(NSStringFromClass([self class])).space().where(query).end().sql();
         FMResultSet *result = [db executeQuery:sql_sc];
         while ([result next])
         {
@@ -211,13 +225,13 @@
     {
         ObjcProperty *pKey = [self.class sql_primaryKey];
         pKey.value = [self valueForKey:pKey.propertyName];
-        SqlCore *sqlcore = [[SqlCore alloc] init];
-        NSString *query = [sqlcore operator_equal:pKey];
+        //查询条件
+        NSString *query = [NSString stringWithFormat:@"%@=%@", pKey.propertyName, pKey.value];
         FMDatabaseQueue *saveQueue = [FMDatabaseQueue databaseQueueWithPath:[[DBHelper sharedInstance] databasePath]];
         [saveQueue inDatabase:^(FMDatabase *db) {
-            SQLStringCreator *sql = [SQLStringCreator creator];
+            SQLStringCreator *sql = [SQLStringCreator sqlCreator];
             //先查找是否有这条数据
-            FMResultSet *result = [db executeQuery:[sql sql_select:@[pKey.propertyName] from:NSStringFromClass(self.class) where:query]];
+            FMResultSet *result = [db executeQuery:sql.select(@[pKey.propertyName]).space().from(NSStringFromClass(self.class)).space().where(query).end().sql()];
             if ([result next])
             {
                 [result close]; //关闭查询结果，否则保存出错
@@ -268,14 +282,16 @@
     NSArray *propertys = [self.class getAllProperty];
     [self setValues:propertys];
     NSMutableArray *values = [[NSMutableArray alloc] init];
+    NSMutableArray *columnNames = [NSMutableArray new];
     for (ObjcProperty *pro in propertys)
     {
         [values addObject:[[pro defaultValue] value]];
+        [columnNames addObject:pro.propertyName];
     }
     
     [[DBHelper sharedInstance].databaseQueue inDatabase:^(FMDatabase *db) {
-        SQLStringCreator *sql = [SQLStringCreator creator];
-        NSString *sql_it = [sql sql_insertInto:NSStringFromClass(self.class) values:propertys];
+        SQLStringCreator *sql = [SQLStringCreator sqlCreator];
+        NSString *sql_it = sql.insert_into(NSStringFromClass(self.class), [columnNames copy]).space().values(values.count).end().sql();
         if (![db executeUpdate:sql_it withArgumentsInArray:[values copy]])
         {
             if (completion)
@@ -302,12 +318,15 @@
             NSArray *propertys = [entity.class getAllProperty];
             [entity setValues:propertys];
             NSMutableArray *values = [[NSMutableArray alloc] init];
+            NSMutableArray *columnNames = [NSMutableArray new];
             for (ObjcProperty *pro in propertys)
             {
                 [values addObject:[[pro defaultValue] value]];
+                [columnNames addObject:pro.propertyName];
             }
-            SQLStringCreator *sql = [SQLStringCreator creator];
-            NSString *sql_it = [sql sql_insertInto:NSStringFromClass(entity.class) values:propertys];
+            
+            SQLStringCreator *sql = [SQLStringCreator sqlCreator];
+            NSString *sql_it = sql.insert_into(NSStringFromClass(entity.class), [columnNames copy]).space().values(values.count).end().sql();
             if (![db executeUpdate:sql_it withArgumentsInArray:[values copy]])
             {
                 NSLog(@"%@", [db lastError]);
@@ -341,14 +360,14 @@
     NSArray *propertys = [self.class getAllProperty];
     [self setValues:propertys];
     [[DBHelper sharedInstance].databaseQueue inDatabase:^(FMDatabase *db) {
-        SQLStringCreator *sql = [SQLStringCreator creator];
+        SQLStringCreator *sql = [SQLStringCreator sqlCreator];
         //先查找是否有这条数据
         if ([self.class respondsToSelector:@selector(sql_primaryKey)] && [self.class sql_primaryKey])
         {
             ObjcProperty *pKey = [self.class sql_primaryKey];
             pKey.value = [self valueForKey:pKey.propertyName];
-            SqlCore *sqlcore = [[SqlCore alloc] init];
-            NSString *query = [sqlcore operator_equal:pKey];
+//            SqlCore *sqlcore = [[SqlCore alloc] init];
+            NSString *query = [NSString stringWithFormat:@"%@=%@", pKey.propertyName, pKey.value];
             //去除主键
             NSMutableArray *mPropertys = [propertys mutableCopy];
             for (ObjcProperty *pro in mPropertys)
@@ -361,12 +380,14 @@
             }
             //提取值
             NSMutableArray *values = [[NSMutableArray alloc] init];
+            NSMutableArray *columnNames = [NSMutableArray new];
             for (ObjcProperty *pro in mPropertys)
             {
                 [values addObject:[[pro defaultValue] value]];
+                [columnNames addObject:pro.propertyName];
             }
             //执行SQL
-            NSString *sql_ud = [sql sql_update:NSStringFromClass(self.class) set:[mPropertys copy] where:query];
+            NSString *sql_ud = sql.update(NSStringFromClass(self.class)).space().set([columnNames copy]).where(query).end().sql();
             if (![db executeUpdate:sql_ud withArgumentsInArray:[values copy]])
             {
                 if (completion)
@@ -393,14 +414,14 @@
         {
             NSArray *propertys = [entity.class getAllProperty];
             [entity setValues:propertys];
-            SQLStringCreator *sql = [SQLStringCreator creator];
+            SQLStringCreator *sql = [SQLStringCreator sqlCreator];
             //先查找是否有这条数据
             if ([entity.class respondsToSelector:@selector(sql_primaryKey)] && [entity.class sql_primaryKey])
             {
                 ObjcProperty *pKey = [self.class sql_primaryKey];
                 pKey.value = [entity valueForKey:pKey.propertyName];
-                SqlCore *sqlcore = [[SqlCore alloc] init];
-                NSString *query = [sqlcore operator_equal:pKey];
+//                SqlCore *sqlcore = [[SqlCore alloc] init];
+                NSString *query = [NSString stringWithFormat:@"%@=%@", pKey.propertyName, pKey.value];
                 //去除主键
                 NSMutableArray *mPropertys = [propertys mutableCopy];
                 for (ObjcProperty *pro in mPropertys)
@@ -413,12 +434,14 @@
                 }
                 //提取值
                 NSMutableArray *values = [[NSMutableArray alloc] init];
+                NSMutableArray *columnNames = [NSMutableArray new];
                 for (ObjcProperty *pro in mPropertys)
                 {
                     [values addObject:[[pro defaultValue] value]];
+                    [columnNames addObject:pro.propertyName];
                 }
                 //执行SQL
-                NSString *sql_ud = [sql sql_update:NSStringFromClass(self.class) set:[mPropertys copy] where:query];
+                NSString *sql_ud = sql.update(NSStringFromClass(entity.class)).space().set([columnNames copy]).where(query).end().sql();
                 if (![db executeUpdate:sql_ud withArgumentsInArray:[values copy]])
                 {
                     NSLog(@"%@", [db lastError]);
@@ -450,7 +473,7 @@
 - (void)deleteObjectWithCompletion:(void (^)(NSError *))completion
 {
     [[DBHelper sharedInstance].databaseQueue inDatabase:^(FMDatabase *db) {
-        SQLStringCreator *sql = [SQLStringCreator creator];
+        SQLStringCreator *sql = [SQLStringCreator sqlCreator];
         ObjcProperty *pKey = nil;
         if ([self.class respondsToSelector:@selector(sql_primaryKey)] && [self.class sql_primaryKey])
         {
@@ -458,9 +481,9 @@
             pKey.value = [self valueForKey:pKey.propertyName];
         }
         
-        SqlCore *sqlcore = [[SqlCore alloc] init];
-        NSString *query = [sqlcore operator_equal:pKey];
-        NSString *sql_d = [sql sql_delete:NSStringFromClass(self.class) where:query];
+        NSString *query = [NSString stringWithFormat:@"%@=%@", pKey.propertyName, pKey.value];
+//        NSString *sql_d = [sql sql_delete:NSStringFromClass(self.class) where:query];
+        NSString *sql_d = sql.del().space().from(NSStringFromClass(self.class)).space().where(query).end().sql();
         if (![db executeUpdate:sql_d])
         {
             if (completion)
@@ -484,7 +507,7 @@
         BOOL err = NO;  //保存在sql执行中出错的状态
         for (DBObject *entity in objects)
         {
-            SQLStringCreator *sql = [SQLStringCreator creator];
+            SQLStringCreator *sql = [SQLStringCreator sqlCreator];
             ObjcProperty *pKey = nil;
             if ([entity.class respondsToSelector:@selector(sql_primaryKey)] && [entity.class sql_primaryKey])
             {
@@ -492,9 +515,8 @@
                 pKey.value = [entity valueForKey:pKey.propertyName];
             }
             
-            SqlCore *sqlcore = [[SqlCore alloc] init];
-            NSString *query = [sqlcore operator_equal:pKey];
-            NSString *sql_d = [sql sql_delete:NSStringFromClass(entity.class) where:query];
+            NSString *query = [NSString stringWithFormat:@"%@=%@", pKey.propertyName, pKey.value];
+            NSString *sql_d = sql.del().space().from(NSStringFromClass(entity.class)).space().where(query).end().sql();
             if (![db executeUpdate:sql_d])
             {
                 NSLog(@"%@", [db lastError]);

@@ -1,118 +1,118 @@
 //
 //  SQLStringCreator.h
-//  FMDB_DBModel
+//  SQLStringCreator-Reactive
 //
-//  Created by LiliEhuu on 17/5/9.
+//  Created by LiliEhuu on 17/5/25.
 //  Copyright © 2017年 LiliEhuu. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
-#import "SqlCore.h"
-
-@class ObjcProperty;
-
-
-#define DBTableName(object) NSStringFromClass([object class])
-
 
 @interface SQLStringCreator : NSObject
 
-/**
- 创造器
-
- @return 返回当前实例
- */
-+ (instancetype)creator;
 
 /**
- 设置主键
+ SQL 实例构建
 
- @param pKey 主键ObjcProperty对象
+ @return 返回当前对象
  */
-- (void)setPrimaryKey:(ObjcProperty *)pKey;
++ (instancetype)sqlCreator;
 
 /**
- 生成创建表的SQL语句
+ 构建任意的SQL
 
- @param tableName 表名称
- @param ine 如果没有这个表就创建的语句
- @param columns 列参数
- @return 返回完整语句
+ @param makeBlock 回调，构建
+ @return 返回SQL字符串
  */
-- (NSString *)sql_createTable:(NSString *)tableName ifNotExists:(BOOL)ine columns:(NSArray <ObjcProperty *>*)columns;
-
-/**
- 生成删除表的SQL语句
-
- @param tableName 表名称
- @param ifExists 是否插入判断表是否存在的语句
- @return 返回完整的语句
- */
-- (NSString *)sql_dropTable:(NSString *)tableName ifExists:(BOOL)ifExists;
-
-/**
- 生成增加列的SQL语句
-
- @param tableName 表名称
- @param column 新增的列，类型：ObjcProperty *
- @return 返回完整的SQL
- */
-- (NSString *)sql_alterTable:(NSString *)tableName addColumn:(ObjcProperty *)column;
++ (NSString *)makeSqlString:(void (^)(SQLStringCreator *makeSql))makeBlock;
 
 
 /**
- 生成查询语句
-
- @param columns 需要查询的字段
- @param tableName 表名称
- @param query where条件，查询条件
- @return 返回完整的SQL
+ 创建表：ifNotExists：如果不存在就创建 tableName：表名称 columns：列名称和数据类型
  */
-- (NSString *)sql_select:(NSArray <NSString *>*)columns from:(NSString *)tableName where:(NSString *)query;
+- (SQLStringCreator *(^)(BOOL ifNotExists, NSString *tableName, NSArray *columns))create_table;
 
 /**
- 生成查询语句
- ----不会查找重复的数据
-
- @param columns 需要查询的字段
- @param tableName 表名称
- @param query where条件，查询条件
- @return 返回完整的SQL
+ 删除表：ifExists：如果存在 tableName：表名称
  */
-- (NSString *)sql_select_distinct:(NSArray <NSString *>*)columns from:(NSString *)tableName where:(NSString *)query;
+- (SQLStringCreator *(^)(BOOL ifExists, NSString *tableName))drop_table;
+
 
 /**
- 生成插入一行的语句
-
- @param tableName 表名称
- @param values 数值列表
- @return 返回完整的SQL
+ 更改表结构 tableName：表名称
  */
-- (NSString *)sql_insertInto:(NSString *)tableName values:(NSArray <ObjcProperty *>*)values;
+- (SQLStringCreator *(^)(NSString *tableName))alter_table;
 
 /**
- 生成修改数据的语句
-
- @param tableName 表名称
- @param columns 列名称+数值，name='EHUU'
- @param query where子句
- @return 返回完整的SQL
+ 添加一列：columnName：列名称 dataType：数据类型
  */
-- (NSString *)sql_update:(NSString *)tableName set:(NSArray <ObjcProperty *>*)columns where:(NSString *)query;
+- (SQLStringCreator *(^)(NSString *columnName, NSString *dataType))add;
+
 
 /**
- 生成删除行的语句
-
- @param tableName 表名称
- @param query 条件语句
- @return 返回完整的SQL
+ 查询，传入需要查询的字段
  */
-- (NSString *)sql_delete:(NSString *)tableName where:(NSString *)query;
+- (SQLStringCreator *(^)(NSArray *columns))select;
 
+/**
+ 查询-返回唯一不同的值
+ */
+- (SQLStringCreator *(^)(NSArray *columns))select_distinct;
+
+- (SQLStringCreator *(^)(NSString *tableName))from;
+
+- (SQLStringCreator *(^)(NSString *query))where;
+
+
+/**
+ 插入一条数据，tableName:表名称 columns:设置的字段
+ */
+- (SQLStringCreator *(^)(NSString *tableName, NSArray *columns))insert_into;
+
+/**
+ 插入值，传入需要插入的字段个数，按"?"拼接，方便FMDB框架自动赋值
+ */
+- (SQLStringCreator *(^)(NSInteger numberOfCols))values;
+
+
+/**
+ 修改数据，传入表名称
+ */
+- (SQLStringCreator *(^)(NSString *tableName))update;
+
+/**
+ 设置数据,格式 uid=?,name=? NSArray *
+ */
+- (SQLStringCreator *(^)(NSArray *columns))set;
+
+
+/**
+ 删除数据
+ */
+- (SQLStringCreator *(^)())del;
+
+
+/**
+ 占位符，传入字符串
+ */
+- (SQLStringCreator *(^)(NSString *placeholder))p;
+
+/**
+ 空格字符
+ */
+- (SQLStringCreator *(^)())space;
+
+/**
+ 结束响应链
+ */
+- (SQLStringCreator *(^)())end;
+
+/**
+ 获取sql
+ */
+- (NSString *(^)())sql;
 
 @end
-
-
 
 
 

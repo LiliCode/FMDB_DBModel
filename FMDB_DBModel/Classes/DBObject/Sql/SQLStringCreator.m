@@ -1,198 +1,239 @@
 //
 //  SQLStringCreator.m
-//  FMDB_DBModel
+//  SQLStringCreator-Reactive
 //
-//  Created by LiliEhuu on 17/5/9.
+//  Created by LiliEhuu on 17/5/25.
 //  Copyright © 2017年 LiliEhuu. All rights reserved.
 //
 
 #import "SQLStringCreator.h"
-#import "NSObject+Runtime.h"
 
 @interface SQLStringCreator ()
-@property (strong , nonatomic) ObjcProperty *pKey;
+@property (strong , nonatomic) NSMutableString *resultSql;
 
 @end
 
 @implementation SQLStringCreator
 
-+ (instancetype)creator
+- (instancetype)init
 {
-    return [[self alloc] init];
-}
-
-- (void)setPrimaryKey:(ObjcProperty *)pKey
-{
-    self.pKey = pKey;
-}
-
-- (NSString *)sql_createTable:(NSString *)tableName ifNotExists:(BOOL)ine columns:(NSArray <ObjcProperty *>*)columns
-{
-    if (!tableName || !columns)
+    if (self = [super init])
     {
-        NSLog(@"%s:表名称:%@ 参数:%@", __func__, tableName, columns);
-        return nil;
+        self.resultSql = [[NSMutableString alloc] init];
     }
     
-    NSMutableString *sql = [[NSMutableString alloc] initWithString:@"CREATE TABLE "];
-    if (ine)
+    return self;
+}
+
++ (instancetype)sqlCreator
+{
+    return [[[self class] alloc] init];
+}
+
++ (NSString *)makeSqlString:(void (^)(SQLStringCreator *))makeBlock
+{
+    SQLStringCreator *sqlC = [[SQLStringCreator alloc] init];
+    if (makeBlock)
     {
-        [sql appendString:@"IF NOT EXISTS "];
+        makeBlock(sqlC);
     }
     
-    //拼接表名称
-    [sql appendString:tableName];
-    
-    //拼接参数
-    [sql appendString:@"("];
-    //将参数和类型的字符串放在数组中：uid INEGETER, name TEXT
-    NSMutableArray *argsList = [[NSMutableArray alloc] init];
-    for (ObjcProperty *pro in columns)
-    {
-        [pro toSqliteType]; //属性数据类型转换成Sqlite数据类型
-        NSString *constaraint = @"";
-        if ([pro.propertyName isEqualToString:self.pKey.propertyName])  //如果是主键，拼接约束
+    return [sqlC.resultSql copy];
+}
+
+
+- (SQLStringCreator *(^)(BOOL, NSString *, NSArray *))create_table
+{
+    return ^SQLStringCreator *(BOOL ifNotExists, NSString *tableName, NSArray *columns) {
+        [self.resultSql appendString:@"CREATE TABLE "];
+        if (ifNotExists) [self.resultSql appendString:@"IF NOT EXISTS "];
+        [self.resultSql appendFormat:@"%@(", tableName];
+        
+        [self.resultSql appendString:[columns componentsJoinedByString:@","]];
+        
+        [self.resultSql appendString:@")"];
+        
+        return self;
+    };
+}
+
+- (SQLStringCreator *(^)(BOOL, NSString *))drop_table
+{
+    return ^SQLStringCreator *(BOOL ifExists, NSString *tableName) {
+        [self.resultSql appendString:@"DROP TABLE "];
+        if (ifExists) [self.resultSql appendString:@"IF EXISTS "];
+        [self.resultSql appendString:tableName];
+        
+        return self;
+    };
+}
+
+
+- (SQLStringCreator *(^)(NSString *))alter_table
+{
+    return ^SQLStringCreator *(NSString *tableName) {
+        [self.resultSql appendFormat:@"ALTER TABLE %@",tableName];
+        
+        return self;
+    };
+}
+
+- (SQLStringCreator *(^)(NSString *, NSString *))add
+{
+    return ^SQLStringCreator *(NSString *column, NSString *type) {
+        [self.resultSql appendFormat:@"ADD COLUMN %@ %@", column, type];
+        
+        return self;
+    };
+}
+
+
+- (SQLStringCreator *(^)(NSArray *))select
+{
+    return ^SQLStringCreator *(NSArray *columns) {
+        NSString *cols = [columns componentsJoinedByString:@","]?:@"*";
+        [self.resultSql appendString:@"SELECT "];
+        [self.resultSql appendString:cols];
+        
+        return self;
+    };
+}
+
+- (SQLStringCreator *(^)(NSArray *))select_distinct
+{
+    return ^SQLStringCreator *(NSArray *columns) {
+        NSString *cols = [columns componentsJoinedByString:@","]?:@"*";
+        [self.resultSql appendString:@"SELECT DISTINCT "];
+        [self.resultSql appendString:cols];
+        
+        return self;
+    };
+}
+
+
+- (SQLStringCreator *(^)(NSString *))from
+{
+    return ^SQLStringCreator *(NSString *tableName) {
+        [self.resultSql appendString:@"FROM "];
+        [self.resultSql appendString:tableName];
+        
+        return self;
+    };
+}
+
+- (SQLStringCreator *(^)(NSString *))where
+{
+    return ^SQLStringCreator *(NSString *query) {
+        if (query.length)
         {
-            constaraint = @" PRIMARY KEY"; // -> uid INTEGER PRIMARY KEY
+            [self.resultSql appendString:@"WHERE "];
+            [self.resultSql appendString:query];
         }
         
-        [argsList addObject:[NSString stringWithFormat:@"%@ %@%@", pro.propertyName, pro.sqlType, constaraint]];
-    }
-    //拼接参数
-    [sql appendString:[argsList componentsJoinedByString:@","]];
-    //拼接最后的一个括号
-    [sql appendString:@");"];
-    
-    return [sql copy];
+        return self;
+    };
 }
 
-- (NSString *)sql_dropTable:(NSString *)tableName ifExists:(BOOL)ifExists
+- (SQLStringCreator *(^)(NSString *, NSArray *columns))insert_into
 {
-    if (!tableName)
-    {
-        NSLog(@"%s:表名称:%@", __func__, tableName);
-        return nil;
-    }
-    
-    NSMutableString *sql = [[NSMutableString alloc] initWithString:@"DROP TABLE "];
-    if (ifExists)
-    {
-        [sql appendString:@"IF EXISTS "];
-    }
-    
-    [sql appendString:tableName];
-    [sql appendString:@";"];
-    
-    return [sql copy];
+    return ^SQLStringCreator *(NSString *tableName, NSArray *columns) {
+        [self.resultSql appendString:@"INSERT INTO "];
+        [self.resultSql appendFormat:@"%@(", tableName];
+        NSString *saveColumn = [columns componentsJoinedByString:@","];
+        [self.resultSql appendFormat:@"%@)", saveColumn];
+        
+        return self;
+    };
 }
 
-
-- (NSString *)sql_alterTable:(NSString *)tableName addColumn:(ObjcProperty *)column
+- (SQLStringCreator *(^)(NSInteger))values
 {
-    if (!tableName || !column)
-    {
-        NSLog(@"%s:表名称:%@ 新增列:%@", __func__, tableName, column);
-        return nil;
-    }
-    //转换成sqlite数据类型
-    [column toSqliteType];
-    
-    return [NSString stringWithFormat:@"ALTER TABLE %@ ADD COLUMN %@ %@;", tableName, column.propertyName, column.sqlType];
+    return ^SQLStringCreator *(NSInteger numberOfCols) {
+        NSMutableArray *valueList = [NSMutableArray new];
+        for (NSInteger count = 0; count < numberOfCols; count++)
+        {
+            [valueList addObject:@"?"];
+        }
+        
+        [self.resultSql appendFormat:@"VALUES(%@)", [valueList componentsJoinedByString:@","]];
+        
+        return self;
+    };
 }
 
 
-- (NSString *)sql_select:(NSArray <NSString *>*)columns from:(NSString *)tableName where:(NSString *)query
+- (SQLStringCreator *(^)(NSString *))update
 {
-    if (!tableName)
-    {
-        NSLog(@"%s:表名称:%@", __func__, tableName);
-        return nil;
-    }
-    
-    SqlCore *sqlCore = [[SqlCore alloc] init];
-    NSMutableString *sql = [[NSString stringWithFormat:@"%@ %@", [sqlCore select:columns], [sqlCore from:tableName]] mutableCopy];
-    if (query)
-    {
-        [sql appendFormat:@" %@", [sqlCore where:query]];
-    }
-    [sql appendString:@";"];
-    
-    return [sql copy];
+    return ^SQLStringCreator *(NSString *tableName) {
+        [self.resultSql appendFormat:@"UPDATE %@", tableName];
+        
+        return self;
+    };
 }
 
-- (NSString *)sql_select_distinct:(NSArray<NSString *> *)columns from:(NSString *)tableName where:(NSString *)query
+- (SQLStringCreator *(^)(NSArray *))set
 {
-    if (!tableName)
-    {
-        NSLog(@"%s:表名称:%@", __func__, tableName);
-        return nil;
-    }
-    
-    SqlCore *sqlCore = [[SqlCore alloc] init];
-    
-    return [NSString stringWithFormat:@"%@ %@ %@;", [sqlCore select_distinct:columns], [sqlCore from:tableName], [sqlCore where:query]];
+    return ^SQLStringCreator *(NSArray *columns) {
+        NSMutableArray *keyValues = [NSMutableArray new];
+        for (NSString *col in columns)
+        {
+            NSString *keyValueStr = [NSString stringWithFormat:@"%@=?", col];
+            [keyValues addObject:keyValueStr];
+        }
+        
+        [self.resultSql appendFormat:@"SET %@", [keyValues componentsJoinedByString:@","]];
+        
+        return self;
+    };
 }
 
-- (NSString *)sql_insertInto:(NSString *)tableName values:(NSArray<ObjcProperty *> *)values
+
+- (SQLStringCreator *(^)())del
 {
-    if (!tableName || !values.count)
-    {
-        NSLog(@"%s:表名称:%@ values:%@", __func__, tableName, values);
-        return nil;
-    }
-    
-    SqlCore *sql = [[SqlCore alloc] init];
-    
-    return [NSString stringWithFormat:@"INSERT INTO %@ %@;", tableName, [sql values:values]];
+    return ^SQLStringCreator *() {
+        [self.resultSql appendString:@"DELETE"];
+        
+        return self;
+    };
 }
 
-- (NSString *)sql_update:(NSString *)tableName set:(NSArray<ObjcProperty *> *)columns where:(NSString *)query
+
+- (SQLStringCreator *(^)(NSString *))p
 {
-    if (!tableName || !columns.count)
-    {
-        NSLog(@"%s:表名称:%@ values:%@", __func__, tableName, columns);
-        return nil;
-    }
-    
-    SqlCore *sql = [[SqlCore alloc] init];
-    NSMutableString *sql_update = [[NSString stringWithFormat:@"%@ %@", [sql update:tableName], [sql set:columns]] mutableCopy];
-    if (query)
-    {
-        [sql_update appendFormat:@" %@", [sql where:query]];
-    }
-    
-    [sql_update appendString:@";"];
-    
-    return [sql_update copy];
+    return ^SQLStringCreator *(NSString *placeholder) {
+        [self.resultSql appendString:placeholder];
+        
+        return self;
+    };
 }
 
-- (NSString *)sql_delete:(NSString *)tableName where:(NSString *)query
+- (SQLStringCreator *(^)())space
 {
-    if (!tableName)
-    {
-        NSLog(@"%s:表名称:%@", __func__, tableName);
-        return nil;
-    }
-    
-    SqlCore *sql = [[SqlCore alloc] init];
-    NSMutableString *sql_delete = [[NSString stringWithFormat:@"DELETE %@", [sql from:tableName]] mutableCopy];
-    if (query)
-    {
-        [sql_delete appendFormat:@" %@", [sql where:query]];
-    }
-    
-    [sql_delete appendString:@";"];
-    
-    return [sql_delete copy];
+    return ^SQLStringCreator *() {
+        [self.resultSql appendString:@" "];
+        
+        return self;
+    };
 }
+
+- (SQLStringCreator *(^)())end
+{
+    return ^SQLStringCreator *() {
+        [self.resultSql appendString:@";"];
+        return self;
+    };
+}
+
+- (NSString *(^)())sql
+{
+    return ^NSString *() {
+        return [self.resultSql copy];
+    };
+}
+
+
 
 
 @end
-
-
-
-
-
-
 
 
